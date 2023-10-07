@@ -24,3 +24,7 @@ obj/
 /data-access-layer-tests/bin/Debug/net8.0/data-access-layer-tests.pdb
 /data-access-layer-tests/bin/Debug/net8.0/data-access-layer.pdb
 /data-access-layer-tests/bin/Debug/net8.0/nunit_random_seed.tmp
+/.vs/data-access-layer/v17/.suo
+/data-access-layer-tests/bin/Debug/net8.0/data-access-layer-tests.pdb
+/data-access-layer-tests/bin/Debug/net8.0/nunit_random_seed.tmp
+/data-access-layer-tests/obj/Debug/net8.0/data-access-layer-tests.pdb
