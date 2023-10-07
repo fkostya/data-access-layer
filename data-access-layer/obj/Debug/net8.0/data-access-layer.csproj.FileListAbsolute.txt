@@ -1,0 +1,12 @@
+C:\Users\Kostya\source\repos\data-access-layer\data-access-layer\bin\Debug\net8.0\data-access-layer.deps.json
+C:\Users\Kostya\source\repos\data-access-layer\data-access-layer\bin\Debug\net8.0\data-access-layer.dll
+C:\Users\Kostya\source\repos\data-access-layer\data-access-layer\bin\Debug\net8.0\data-access-layer.pdb
+C:\Users\Kostya\source\repos\data-access-layer\data-access-layer\obj\Debug\net8.0\data-access-layer.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Kostya\source\repos\data-access-layer\data-access-layer\obj\Debug\net8.0\data-access-layer.AssemblyInfoInputs.cache
+C:\Users\Kostya\source\repos\data-access-layer\data-access-layer\obj\Debug\net8.0\data-access-layer.AssemblyInfo.cs
+C:\Users\Kostya\source\repos\data-access-layer\data-access-layer\obj\Debug\net8.0\data-access-layer.csproj.CoreCompileInputs.cache
+C:\Users\Kostya\source\repos\data-access-layer\data-access-layer\obj\Debug\net8.0\data-access-layer.dll
+C:\Users\Kostya\source\repos\data-access-layer\data-access-layer\obj\Debug\net8.0\refint\data-access-layer.dll
+C:\Users\Kostya\source\repos\data-access-layer\data-access-layer\obj\Debug\net8.0\data-access-layer.pdb
+C:\Users\Kostya\source\repos\data-access-layer\data-access-layer\obj\Debug\net8.0\ref\data-access-layer.dll
+C:\Users\Kostya\source\repos\data-access-layer\data-access-layer\obj\Debug\net8.0\data-access-layer.csproj.AssemblyReference.cache
