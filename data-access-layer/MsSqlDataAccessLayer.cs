@@ -1,6 +1,8 @@
 ﻿using log4net;
 using Microsoft.Data.SqlClient;
 using Microsoft.IdentityModel.Tokens;
+using System.Collections.ObjectModel;
+using System.Data.Common;
 using System.Text;
 
 namespace data_access_layer
@@ -19,9 +21,9 @@ namespace data_access_layer
             _connection_timeout = connection_timeout;
         }
 
-        public async Task<DataSet> SelectDataAsDataSet(StringBuilder sql_query_text) {
+        public async Task<DataSet> SelectDataAsDataSet(StringBuilder sql_query_text, CancellationToken cancellationToken = default) {
             if (string.IsNullOrEmpty(sql_query_text?.ToString()) || !isSqlQueryTextValid(sql_query_text))
-                return DataSet.Empty;
+                return DataSet.Empty();
 
             try
             {
@@ -48,12 +50,26 @@ namespace data_access_layer
 
                         SqlCommand command = new SqlCommand(sql_query_text?.ToString(), connection);
 
-                        var reader = await command.ExecuteReaderAsync();
+                        var reader = await command.ExecuteReaderAsync(cancellationToken);
 
                         var dataset = new DataSet();
 
-                        while (await reader.ReadAsync())
+                        var columns = reader.HasRows ? await reader.GetColumnSchemaAsync(cancellationToken) : new ReadOnlyCollection<DbColumn>(new List<DbColumn>());
+
+                        foreach (var column in columns)
                         {
+                            dataset.Columns[column.ColumnName] = column;
+                        }
+
+                        while (await reader.ReadAsync(cancellationToken))
+                        {
+                            //read single row
+                            var row = new Dictionary<string, object>();
+                            foreach (var column in dataset.Columns)
+                            {
+                                row[column.Key] = reader[column.Key];
+                            }
+                            dataset.Add(row);
                         }
 
                         await connection.CloseAsync();

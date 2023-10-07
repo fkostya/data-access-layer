@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("data-access-layer-tests")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+94c7e3eeafdb3c8f5d91139c92d7c590835644f2")]
 [assembly: System.Reflection.AssemblyProductAttribute("data-access-layer-tests")]
 [assembly: System.Reflection.AssemblyTitleAttribute("data-access-layer-tests")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

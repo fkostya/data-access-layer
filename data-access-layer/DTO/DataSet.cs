@@ -1,14 +1,36 @@
-﻿namespace data_access_layer
+﻿using System.Collections;
+using System.Data.Common;
+
+namespace data_access_layer
 {
-    public class DataSet
+    public class DataSet : IEnumerable
     {
         public static DataSet Empty()
         {
             return new DataSet();
         }
 
-        public IEnumerable<Dictionary<string, object>> Result { get; internal set; }
+        public void Add(Dictionary<string, object> row)
+        {
+            if(row != null)
+            {
+                rows.Add(row);
+            }
+        }
 
-        public Dictionary<string, object> FieldType;
+        public IEnumerator GetEnumerator()
+        {
+            throw new NotImplementedException();
+        }
+
+        public IList<Dictionary<string, object>> rows { get; set; }
+
+        public Dictionary<string, DbColumn> Columns { get; set; }
+
+        public DataSet()
+        {
+            Columns = new Dictionary<string, DbColumn>();
+            rows = new List<Dictionary<string, object>>();
+        }
     }
 }
