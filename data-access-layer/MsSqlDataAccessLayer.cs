@@ -47,14 +47,14 @@ namespace data_access_layer
                     {
                         await connection.OpenAsync();
 
-                        SqlCommand command = new SqlCommand(sql_query_text?.ToString(), connection);
+                        SqlCommand command = new SqlCommand(sql_query_text.ToString(), connection);
 
                         var reader = await command.ExecuteReaderAsync(cancellationToken);
 
+                        if(!reader.HasRows) return MsSqlDataSet.Empty;
+                        var columns = await reader.GetColumnSchemaAsync(cancellationToken);
+
                         var dataset = new MsSqlDataSet();
-
-                        var columns = reader.HasRows ? await reader.GetColumnSchemaAsync(cancellationToken) : new ReadOnlyCollection<DbColumn>(new List<DbColumn>());
-
                         foreach (var column in columns)
                         {
                             dataset.AddColumn(column);
@@ -88,13 +88,6 @@ namespace data_access_layer
         private bool isSqlQueryTextValid(StringBuilder sql_query)
         {
             return true;
-        }
-
-        private Task<Dictionary<string, object>> getMetaData()
-        {
-            var t = new Dictionary<string, object>();
-
-            return Task.FromResult(t);
         }
     }
 }
