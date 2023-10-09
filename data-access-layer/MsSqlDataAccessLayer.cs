@@ -1,6 +1,5 @@
 ﻿using log4net;
 using Microsoft.Data.SqlClient;
-using Microsoft.IdentityModel.Tokens;
 using System.Collections.ObjectModel;
 using System.Data.Common;
 using System.Text;
@@ -21,9 +20,9 @@ namespace data_access_layer
             _connection_timeout = connection_timeout;
         }
 
-        public async Task<DataSet> SelectDataAsDataSet(StringBuilder sql_query_text, CancellationToken cancellationToken = default) {
+        public async Task<MsSqlDataSet> SelectDataAsDataSet(StringBuilder sql_query_text, CancellationToken cancellationToken = default) {
             if (string.IsNullOrEmpty(sql_query_text?.ToString()) || !isSqlQueryTextValid(sql_query_text))
-                return DataSet.Empty();
+                return MsSqlDataSet.Empty;
 
             try
             {
@@ -34,7 +33,7 @@ namespace data_access_layer
                                                 Database={_msSqlAccess["database"]}
                                                     {(_msSqlAccess.ContainsKey("port") ? $",{_msSqlAccess["port"]}" : "")};
                                                 Trusted_Connection={_trusted_connection.ToString()};
-                                                {(_msSqlAccess.ContainsKey("userid") ? $"User Id ={_msSqlAccess["user_id"]}" : "")};
+                                                {(_msSqlAccess.ContainsKey("userid") ? $"User Id ={_msSqlAccess["userid"]}" : "")};
                                                 {(_msSqlAccess.ContainsKey("password") ? $"Password ={_msSqlAccess["password"]}" : "")};";
 
                     var builder = new SqlConnectionStringBuilder(connectionString)
@@ -52,13 +51,13 @@ namespace data_access_layer
 
                         var reader = await command.ExecuteReaderAsync(cancellationToken);
 
-                        var dataset = new DataSet();
+                        var dataset = new MsSqlDataSet();
 
                         var columns = reader.HasRows ? await reader.GetColumnSchemaAsync(cancellationToken) : new ReadOnlyCollection<DbColumn>(new List<DbColumn>());
 
                         foreach (var column in columns)
                         {
-                            dataset.Columns[column.ColumnName] = column;
+                            dataset.AddColumn(column);
                         }
 
                         while (await reader.ReadAsync(cancellationToken))
@@ -83,7 +82,7 @@ namespace data_access_layer
                 log.Error(ex.Message, ex);
             }
 
-            return DataSet.Empty();
+            return MsSqlDataSet.Empty;
         }
 
         private bool isSqlQueryTextValid(StringBuilder sql_query)
