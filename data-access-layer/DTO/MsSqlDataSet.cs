@@ -4,23 +4,17 @@ using System.Data.Common;
 
 namespace data_access_layer
 {
-    public class MsSqlDataSet : IEnumerable<Dictionary<string, object>>
+    public class MsSqlDataSet
     {
         private IList<Dictionary<string, object>> internalList;
         public Dictionary<string, DbColumn> Columns { get; private set; }
+        public string DataSetName {  get; private set; }
 
         public MsSqlDataSet()
         {
             Columns = new Dictionary<string, DbColumn>();
             internalList = new List<Dictionary<string, object>>();
-        }
-
-        public static MsSqlDataSet Empty
-        {
-            get
-            {
-                return new MsSqlDataSet();
-            }
+            DataSetName = Guid.NewGuid().ToString();
         }
 
         public void Add(Dictionary<string, object> row)
@@ -37,16 +31,6 @@ namespace data_access_layer
             {
                 Columns.Add(column.ColumnName, column);
             }
-        }
-
-        public IEnumerator<Dictionary<string, object>> GetEnumerator()
-        {
-            return internalList.GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
         }
     }
 }

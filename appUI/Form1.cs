@@ -17,7 +17,9 @@ namespace appUI
             var sql = new MsSqlDataAccessLayer("Server=(localdb)\\MSSQLLocalDB;Database=test;Trusted_Connection=True;");
 
 
-            var t = await sql.SelectDataAsDataSet("select * from master");
+            var t = await sql.SelectDataAsDataSet($@"
+                            select * from master
+                            select id as idAsSecondResult from master where id between 2 and 5");
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using log4net;
 using Microsoft.Data.SqlClient;
+using System.Data;
 
 namespace data_access_layer
 {
@@ -25,9 +26,9 @@ namespace data_access_layer
             }
         }
 
-        public async Task<MsSqlDataSet> SelectDataAsDataSet(string sql_query_text, CancellationToken cancellationToken = default) {
-            if (string.IsNullOrEmpty(sql_query_text) || !isSqlQueryTextValid(sql_query_text))
-                return MsSqlDataSet.Empty;
+        public async Task<IEnumerable<MsSqlDataSet>> SelectDataAsDataSet(string sql_query_text, CancellationToken cancellationToken = default) {
+            if (string.IsNullOrEmpty(sql_query_text))
+                return Array.Empty<MsSqlDataSet>();
 
             try
             {
@@ -46,29 +47,35 @@ namespace data_access_layer
 
                     var reader = await command.ExecuteReaderAsync(cancellationToken);
 
-                    if(!reader.HasRows) return MsSqlDataSet.Empty;
-                    var columns = await reader.GetColumnSchemaAsync(cancellationToken);
+                    if(!reader.HasRows) return Array.Empty<MsSqlDataSet>();
 
-                    var dataset = new MsSqlDataSet();
-                    foreach (var column in columns)
-                    {
-                        dataset.AddColumn(column);
-                    }
+                    var list = new List<MsSqlDataSet>();
 
-                    while (await reader.ReadAsync(cancellationToken))
+                    do
                     {
-                        //read single row
-                        var row = new Dictionary<string, object>();
-                        foreach (var column in dataset.Columns)
+                        var columns = await reader.GetColumnSchemaAsync(cancellationToken);
+
+                        var dataset = new MsSqlDataSet();
+                        foreach (var column in columns)
                         {
-                            row[column.Key] = reader[column.Key];
+                            dataset.AddColumn(column);
                         }
-                        dataset.Add(row);
-                    }
+
+                        while (await reader.ReadAsync(cancellationToken))
+                        {
+                            //read single row
+                            var row = new Dictionary<string, object>();
+                            foreach (var column in dataset.Columns)
+                            {
+                                row[column.Key] = reader[column.Key];
+                            }
+                            dataset.Add(row);
+                        }
+                        list.Add(dataset);
+                    } while (await reader.NextResultAsync());
 
                     await connection.CloseAsync();
-
-                    return dataset;
+                    return list;
                 }
             }
             catch (Exception ex)
@@ -76,12 +83,7 @@ namespace data_access_layer
                 log.Error(ex.Message, ex);
             }
 
-            return MsSqlDataSet.Empty;
-        }
-
-        private bool isSqlQueryTextValid(string sql_query)
-        {
-            return true;
+            return Array.Empty<MsSqlDataSet>();
         }
     }
 }
