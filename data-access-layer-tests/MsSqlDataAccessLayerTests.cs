@@ -8,9 +8,7 @@ namespace data_access_layer_tests
         [Test]
         public void MsSqlDataAccessLayer_NewInstanceWithNull_NoException()
         {
-#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            Assert.DoesNotThrow(() => new MsSqlDataAccessLayer(null));
-#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
+            Assert.DoesNotThrow(() => new MsSqlDataAccessLayer(string.Empty));
         }
 
         [Test]
@@ -18,7 +16,7 @@ namespace data_access_layer_tests
         {
             var access = new Dictionary<string, string>();
             MsSqlDataAccessLayer sql = new MsSqlDataAccessLayer(access);
-            await sql.SelectDataAsDataSet(new StringBuilder());
+            await sql.SelectDataAsDataSet("");
         }
     }
 }

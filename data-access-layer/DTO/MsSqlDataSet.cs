@@ -1,6 +1,4 @@
-﻿using Microsoft.IdentityModel.Tokens;
-using System.Collections;
-using System.Data.Common;
+﻿using System.Data.Common;
 
 namespace data_access_layer
 {
@@ -16,6 +14,8 @@ namespace data_access_layer
             internalList = new List<Dictionary<string, object>>();
             DataSetName = Guid.NewGuid().ToString();
         }
+
+        public Dictionary<string, object> this[int index] => this.internalList[index];
 
         public void Add(Dictionary<string, object> row)
         {

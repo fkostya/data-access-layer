@@ -13,7 +13,7 @@ namespace data_access_layer_tests
     public class MsSqlDataSetTests
     {
         [Test]
-        public void MsSqlDataSet_ctor_IsNotNull()
+        public void MsSqlDataSet_NewInstance_IsNotNull()
         {
             MsSqlDataSet ds = new MsSqlDataSet();
             Assert.IsNotNull(ds);
@@ -25,15 +25,7 @@ namespace data_access_layer_tests
             MsSqlDataSet ds = new MsSqlDataSet();
             ds.Add(new Dictionary<string, object> { { "row-0", new object() } });
 
-            Assert.True(1 == ds.Count());
-        }
-
-        [Test]
-        public void MsSqlDataSet_Empty_IsNotNull()
-        {
-            MsSqlDataSet ds = new MsSqlDataSet();
-
-            Assert.IsNotNull(MsSqlDataSet.Empty);
+            Assert.True(1 == ds[0].Count());
         }
 
         [Test]
