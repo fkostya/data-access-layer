@@ -11,3 +11,8 @@ data-access-layer/obj/
 data-access-layer/.vs/
 data-access-layer-tests/bin/
 data-access-layer-tests/obj/
+appui/obj/
+appui/bin/
+/.vs/data-access-layer/
+/.vs/data-access-layer/DesignTimeBuild/
+/.vs/data-access-layer/DesignTimeBuild/.dtbcache.v2
