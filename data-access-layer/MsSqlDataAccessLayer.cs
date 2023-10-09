@@ -20,7 +20,7 @@ namespace data_access_layer
                 
         }
         public MsSqlDataAccessLayer(Dictionary<string, string> msSqlAccess, int connection_timeout = 1000)
-            :this("", msSqlAccess["userid"], msSqlAccess["userpassword"], connection_timeout)
+            : this("", msSqlAccess.GetValueOrDefault("userid"), msSqlAccess.GetValueOrDefault("userpassword"), connection_timeout)
         {
             msSqlAccess = msSqlAccess ?? new Dictionary<string, string>();
             //must be specified fields to establish connection to ms sql server

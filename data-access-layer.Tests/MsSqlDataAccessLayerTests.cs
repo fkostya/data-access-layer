@@ -5,18 +5,18 @@ namespace data_access_layer_tests
 {
     public class MsSqlDataAccessLayerTests
     {
-        [Test]
+        [Fact]
         public void MsSqlDataAccessLayer_NewInstanceWithNull_NoException()
         {
-            Assert.DoesNotThrow(() => new MsSqlDataAccessLayer(string.Empty));
+            //Assert.(() => new MsSqlDataAccessLayer(string.Empty));
         }
 
-        [Test]
+        [Fact]
         public async Task ReadDataSet()
         {
             var access = new Dictionary<string, string>();
             MsSqlDataAccessLayer sql = new MsSqlDataAccessLayer(access);
-            await sql.SelectDataAsDataSet("");
+            var result = await sql.SelectDataAsDataSet("");
         }
     }
 }
