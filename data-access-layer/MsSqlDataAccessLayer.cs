@@ -1,18 +1,26 @@
 ﻿using log4net;
+using log4net.Repository.Hierarchy;
 using Microsoft.Data.SqlClient;
-using System.Data;
+using System.Diagnostics;
 
 namespace data_access_layer
 {
-    public class MsSqlDataAccessLayer(string connectionString, int connection_timeout = 1000)
+    public class MsSqlDataAccessLayer(string connectionString, string userid, string userpassword, int connection_timeout = 1000)
     {
-        private readonly Dictionary<string, string> msSqlAccess;
         private static readonly ILog log = LogManager.GetLogger(typeof(MsSqlDataAccessLayer));
         private readonly int _connection_timeout = connection_timeout;
         private readonly string _connectionString = connectionString;
+        private readonly string _userid = userid;
+        private readonly string _userpassword = userpassword;
 
+        #region ctor
+        public MsSqlDataAccessLayer(string connectionString, int connection_timeout = 1000)
+            :this(connectionString, "", "", connection_timeout)
+        {
+                
+        }
         public MsSqlDataAccessLayer(Dictionary<string, string> msSqlAccess, int connection_timeout = 1000)
-            :this("", connection_timeout)
+            :this("", msSqlAccess["userid"], msSqlAccess["userpassword"], connection_timeout)
         {
             msSqlAccess = msSqlAccess ?? new Dictionary<string, string>();
             //must be specified fields to establish connection to ms sql server
@@ -21,14 +29,18 @@ namespace data_access_layer
                 _connectionString = $@"Server={msSqlAccess["server"]};
                                                 Database={msSqlAccess["database"]}
                                                     {(msSqlAccess.ContainsKey("port") ? $",{msSqlAccess["port"]}" : "")};
-                                                {(msSqlAccess.ContainsKey("userid") ? $"User Id ={msSqlAccess["userid"]}" : "")};
-                                                {(msSqlAccess.ContainsKey("password") ? $"Password ={msSqlAccess["password"]}" : "")};";
+                                                {(!string.IsNullOrEmpty(_userid) ? $"User Id ={_userid}" : "")};
+                                                {(!string.IsNullOrEmpty(_userpassword) ? $"Password ={_userpassword}" : "")};";
             }
         }
+        #endregion
 
         public async Task<IEnumerable<MsSqlDataSet>> SelectDataAsDataSet(string sql_query_text, CancellationToken cancellationToken = default) {
-            if (string.IsNullOrEmpty(sql_query_text))
+            if (string.IsNullOrEmpty(sql_query_text) || string.IsNullOrEmpty(_connectionString))
                 return Array.Empty<MsSqlDataSet>();
+
+            Stopwatch sw = new();
+            sw.Start();
 
             try
             {
@@ -81,6 +93,11 @@ namespace data_access_layer
             catch (Exception ex)
             {
                 log.Error(ex.Message, ex);
+            }
+            finally
+            {
+                sw.Stop();
+                log.Info($"{sw.Elapsed} total query run time for {_connectionString}");
             }
 
             return Array.Empty<MsSqlDataSet>();

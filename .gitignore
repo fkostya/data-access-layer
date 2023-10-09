@@ -6,6 +6,8 @@
 bin/
 obj/
 .vs/
+
+
 data-access-layer/bin/
 data-access-layer/obj/
 data-access-layer/.vs/
@@ -15,4 +17,5 @@ appui/obj/
 appui/bin/
 /.vs/data-access-layer/
 /.vs/data-access-layer/DesignTimeBuild/
+/.vs/data-access-layer/DesignTimeBuild/.dtbcache.v2
 /.vs/data-access-layer/DesignTimeBuild/.dtbcache.v2

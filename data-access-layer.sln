@@ -7,7 +7,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "data-access-layer", "data-a
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "data-access-layer-tests", "data-access-layer-tests\data-access-layer-tests.csproj", "{0AB43615-5046-4704-AB6E-E2B7A648606B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "appUI", "appUI\appUI.csproj", "{369297E3-7160-4F98-BA6F-25BCE09344F0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "appUI", "appUI\appUI.csproj", "{369297E3-7160-4F98-BA6F-25BCE09344F0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{59D1B6EA-CB86-453D-B693-77F39BC7E1B2}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
