@@ -1,14 +1,19 @@
 using data_access_layer;
-using System.Text;
 
 namespace data_access_layer_tests
 {
     public class MsSqlDataAccessLayerTests
     {
         [Fact]
-        public void MsSqlDataAccessLayer_NewInstanceWithNull_NoException()
+        public void MsSqlDataAccessLayer_NewInstanceWithNull_NotNull()
         {
-            //Assert.(() => new MsSqlDataAccessLayer(string.Empty));
+            Assert.NotNull(() => new MsSqlDataAccessLayer(string.Empty));
+        }
+
+        [Fact]
+        public void MsSqlDataAccessLayer_NewInstanceWithConnection_NotNull()
+        {
+            Assert.NotNull(() => new MsSqlDataAccessLayer("connectionString"));
         }
 
         [Fact]

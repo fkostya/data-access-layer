@@ -1,5 +1,4 @@
 ﻿using log4net;
-using log4net.Repository.Hierarchy;
 using Microsoft.Data.SqlClient;
 using System.Diagnostics;
 
@@ -13,16 +12,18 @@ namespace data_access_layer
         private readonly string _userid = userid;
         private readonly string _userpassword = userpassword;
 
+        public bool ValidConnection => !string.IsNullOrEmpty(_connectionString);
+
         #region ctor
         public MsSqlDataAccessLayer(string connectionString, int connection_timeout = 1000)
-            :this(connectionString, "", "", connection_timeout)
+            : this(connectionString, "", "", connection_timeout)
         {
-                
         }
+
         public MsSqlDataAccessLayer(Dictionary<string, string> msSqlAccess, int connection_timeout = 1000)
-            : this("", msSqlAccess.GetValueOrDefault("userid"), msSqlAccess.GetValueOrDefault("userpassword"), connection_timeout)
+            : this("", msSqlAccess.GetValueOrDefault("userid") ?? "", msSqlAccess.GetValueOrDefault("userpassword") ?? "", connection_timeout)
         {
-            msSqlAccess = msSqlAccess ?? new Dictionary<string, string>();
+            msSqlAccess = msSqlAccess ?? new();
             //must be specified fields to establish connection to ms sql server
             if (msSqlAccess.ContainsKey("server") && msSqlAccess.ContainsKey("database"))
             {
@@ -36,7 +37,7 @@ namespace data_access_layer
         #endregion
 
         public async Task<IEnumerable<MsSqlDataSet>> SelectDataAsDataSet(string sql_query_text, CancellationToken cancellationToken = default) {
-            if (string.IsNullOrEmpty(sql_query_text) || string.IsNullOrEmpty(_connectionString))
+            if (string.IsNullOrEmpty(sql_query_text) || !ValidConnection)
                 return Array.Empty<MsSqlDataSet>();
 
             Stopwatch sw = new();

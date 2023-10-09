@@ -36,5 +36,12 @@ namespace data_access_layer_tests
 
             Assert.NotEmpty(ds.Columns);
         }
+
+        [Fact]
+        public void MsSqlDataSet_NewInstance_UniqueDsName()
+        {
+            MsSqlDataSet ds = new();
+            Assert.NotEmpty(ds.DataSetName);
+        }
     }
 }
