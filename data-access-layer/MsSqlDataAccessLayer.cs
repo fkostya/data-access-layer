@@ -36,6 +36,10 @@ namespace data_access_layer
         }
         #endregion
 
+        public virtual SqlConnection GetConnection(string connectionString) {
+            return new SqlConnection(connectionString);
+        }
+        
         public async Task<IEnumerable<MsSqlDataSet>> SelectDataAsDataSet(string sql_query_text, CancellationToken cancellationToken = default) {
             if (string.IsNullOrEmpty(sql_query_text) || !ValidConnection)
                 return Array.Empty<MsSqlDataSet>();
@@ -50,45 +54,48 @@ namespace data_access_layer
                     ConnectTimeout = _connection_timeout,
                 };
 
-                log.Info(builder);
+                log.DebugFormat("ConnectionString {ConnectionString} query {Query}", builder, sql_query_text);
 
-                using (var connection = new SqlConnection(builder.ConnectionString))
+                using (var connection = GetConnection(builder.ConnectionString))
                 {
                     await connection.OpenAsync(cancellationToken);
-
-                    SqlCommand command = new SqlCommand(sql_query_text, connection);
-
-                    var reader = await command.ExecuteReaderAsync(cancellationToken);
-
-                    if(!reader.HasRows) return Array.Empty<MsSqlDataSet>();
-
-                    var list = new List<MsSqlDataSet>();
-
-                    do
+                    using (var command = connection.CreateCommand())
                     {
-                        var columns = await reader.GetColumnSchemaAsync(cancellationToken);
+                        command.CommandText = sql_query_text;
 
-                        var dataset = new MsSqlDataSet();
-                        foreach (var column in columns)
+                        using (var reader = await command.ExecuteReaderAsync(cancellationToken))
                         {
-                            dataset.AddColumn(column);
-                        }
+                            if (!reader.HasRows) return Array.Empty<MsSqlDataSet>();
 
-                        while (await reader.ReadAsync(cancellationToken))
-                        {
-                            //read single row
-                            var row = new Dictionary<string, object>();
-                            foreach (var column in dataset.Columns)
+                            var list = new List<MsSqlDataSet>();
+
+                            do
                             {
-                                row[column.Key] = reader[column.Key];
-                            }
-                            dataset.Add(row);
-                        }
-                        list.Add(dataset);
-                    } while (await reader.NextResultAsync());
+                                var columns = await reader.GetColumnSchemaAsync(cancellationToken);
 
-                    await connection.CloseAsync();
-                    return list;
+                                var dataset = new MsSqlDataSet();
+                                foreach (var column in columns)
+                                {
+                                    dataset.AddColumn(column);
+                                }
+
+                                while (await reader.ReadAsync(cancellationToken))
+                                {
+                                    //read single row
+                                    var row = new Dictionary<string, object>();
+                                    foreach (var column in dataset.Columns)
+                                    {
+                                        row[column.Key] = reader[column.Key];
+                                    }
+                                    dataset.Add(row);
+                                }
+                                list.Add(dataset);
+                            } while (await reader.NextResultAsync());
+
+                            await connection.CloseAsync();
+                            return list;
+                        }
+                    }
                 }
             }
             catch (Exception ex)
@@ -98,7 +105,7 @@ namespace data_access_layer
             finally
             {
                 sw.Stop();
-                log.Info($"{sw.Elapsed} total query run time for {_connectionString}");
+                log.DebugFormat("{SqlTotalExecutionTime} total query run time for {ConnectionString}", sw.Elapsed, _connectionString);
             }
 
             return Array.Empty<MsSqlDataSet>();
