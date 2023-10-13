@@ -1,4 +1,5 @@
-﻿using log4net;
+﻿using data_access_layer.MsSql;
+using log4net;
 using Microsoft.Data.SqlClient;
 using System.Diagnostics;
 
@@ -11,10 +12,17 @@ namespace data_access_layer
         private readonly string _connectionString = connectionString;
         private readonly string _userid = userid;
         private readonly string _userpassword = userpassword;
+        private readonly Func<string, SqlConnectionWrapper> _factory = (string connectionString) => SqlConnectionWrapper.Default(connectionString);
 
         public bool ValidConnection => !string.IsNullOrEmpty(_connectionString);
 
         #region ctor
+        public MsSqlDataAccessLayer(Func<string, SqlConnectionWrapper> factory, Dictionary<string, string> connection)
+            : this(connection)
+        {
+            _factory = factory;
+        }
+
         public MsSqlDataAccessLayer(string connectionString, int connection_timeout = 1000)
             : this(connectionString, "", "", connection_timeout)
         {
@@ -23,13 +31,13 @@ namespace data_access_layer
         public MsSqlDataAccessLayer(Dictionary<string, string> msSqlAccess, int connection_timeout = 1000)
             : this("", msSqlAccess.GetValueOrDefault("userid") ?? "", msSqlAccess.GetValueOrDefault("userpassword") ?? "", connection_timeout)
         {
-            msSqlAccess = msSqlAccess ?? new();
+            msSqlAccess ??= [];
             //must be specified fields to establish connection to ms sql server
-            if (msSqlAccess.ContainsKey("server") && msSqlAccess.ContainsKey("database"))
+            if (msSqlAccess.TryGetValue("server", out string? server) && msSqlAccess.TryGetValue("database", out string? database))
             {
-                _connectionString = $@"Server={msSqlAccess["server"]};
-                                                Database={msSqlAccess["database"]}
-                                                    {(msSqlAccess.ContainsKey("port") ? $",{msSqlAccess["port"]}" : "")};
+                _connectionString = $@"Server={server};
+                                                Database={database}
+                                                    {(msSqlAccess.TryGetValue("port", out string? port) ? $",{port}" : "")};
                                                 {(!string.IsNullOrEmpty(_userid) ? $"User Id ={_userid}" : "")};
                                                 {(!string.IsNullOrEmpty(_userpassword) ? $"Password ={_userpassword}" : "")};";
             }
@@ -56,47 +64,41 @@ namespace data_access_layer
 
                 log.DebugFormat("ConnectionString {ConnectionString} query {Query}", builder, sql_query_text);
 
-                using (var connection = GetConnection(builder.ConnectionString))
+                using var connection = _factory.Invoke(builder.ConnectionString);
+                await connection.OpenAsync(cancellationToken);
+                using var command = connection.CreateCommand();
+                command.CommandText = sql_query_text;
+
+                using var reader = await command.ExecuteReaderAsync(cancellationToken);
+                if (!reader.HasRows) return Enumerable.Empty<MsSqlDataSet>();
+
+                var list = new List<MsSqlDataSet>();
+
+                do
                 {
-                    await connection.OpenAsync(cancellationToken);
-                    using (var command = connection.CreateCommand())
+                    var columns = await reader.GetColumnSchemaAsync(cancellationToken);
+
+                    var dataset = new MsSqlDataSet();
+                    foreach (var column in columns)
                     {
-                        command.CommandText = sql_query_text;
-
-                        using (var reader = await command.ExecuteReaderAsync(cancellationToken))
-                        {
-                            if (!reader.HasRows) return Array.Empty<MsSqlDataSet>();
-
-                            var list = new List<MsSqlDataSet>();
-
-                            do
-                            {
-                                var columns = await reader.GetColumnSchemaAsync(cancellationToken);
-
-                                var dataset = new MsSqlDataSet();
-                                foreach (var column in columns)
-                                {
-                                    dataset.AddColumn(column);
-                                }
-
-                                while (await reader.ReadAsync(cancellationToken))
-                                {
-                                    //read single row
-                                    var row = new Dictionary<string, object>();
-                                    foreach (var column in dataset.Columns)
-                                    {
-                                        row[column.Key] = reader[column.Key];
-                                    }
-                                    dataset.Add(row);
-                                }
-                                list.Add(dataset);
-                            } while (await reader.NextResultAsync());
-
-                            await connection.CloseAsync();
-                            return list;
-                        }
+                        dataset.AddColumn(column);
                     }
-                }
+
+                    while (await reader.ReadAsync(cancellationToken))
+                    {
+                        //read single row
+                        var row = new Dictionary<string, object>();
+                        foreach (var column in dataset.Columns)
+                        {
+                            row[column.Key] = reader[column.Key];
+                        }
+                        dataset.Add(row);
+                    }
+                    list.Add(dataset);
+                } while (await reader.NextResultAsync(cancellationToken));
+
+                await connection.CloseAsync();
+                return list;
             }
             catch (Exception ex)
             {
