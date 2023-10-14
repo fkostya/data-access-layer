@@ -70,7 +70,7 @@ namespace data_access_layer
                 command.CommandText = sql_query_text;
 
                 using var reader = await command.ExecuteReaderAsync(cancellationToken);
-                if (!reader.HasRows) return Enumerable.Empty<MsSqlDataSet>();
+                if (reader == null || !reader.HasRows) return Enumerable.Empty<MsSqlDataSet>();
 
                 var list = new List<MsSqlDataSet>();
 

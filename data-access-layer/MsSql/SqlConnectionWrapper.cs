@@ -18,16 +18,16 @@ namespace data_access_layer.MsSql
             await connection.OpenAsync(cancellationToken);
         }
 
-        public virtual SqlCommand CreateCommand()
+        public virtual SqlCommandWrapper CreateCommand()
         {
-            return connection.CreateCommand();
+            return new SqlCommandWrapper(connection.CreateCommand());
         }
-
-        public void Dispose() => connection.Dispose();
 
         public virtual Task CloseAsync()
         {
             return connection.CloseAsync();
         }
+
+        public void Dispose() => connection.Dispose();
     }
 }

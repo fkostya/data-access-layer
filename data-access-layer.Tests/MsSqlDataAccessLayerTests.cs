@@ -1,6 +1,8 @@
 using data_access_layer;
+using data_access_layer.MsSql;
 using Microsoft.Data.SqlClient;
 using Moq;
+using System.Data.Common;
 
 namespace data_access_layer_tests
 {
@@ -59,20 +61,28 @@ namespace data_access_layer_tests
         [Fact]
         public async Task MsSqlDataAccessLayer_ReadDataSet()
         {
-            MsSqlDataAccessLayer build = new(new Dictionary<string, string> {
-                {"server", "local" },
-                {"database", "db" },
-                {"port", "999" },
-                {"userid", "sa" },
-                {"password", "pwd" }
-            });
+            var connection = new Dictionary<string, string> {
+                {"server", "test-local" },
+                {"database", "test-db" },
+                {"port", "test-port" },
+                {"userid", "test-sa" },
+                {"password", "test-pwd" }
+            };
 
-            var mock = new Mock<MsSqlDataAccessLayer>();
-            var con = new SqlConnection();
-            mock
-                .Setup(f => f.GetConnection(It.IsAny<string>()))
-                .Returns(con);
-            var result = await build.SelectDataAsDataSet("select");
+            var wrapper = new Mock<SqlConnectionWrapper>("");
+            var command = new Mock<SqlCommandWrapper>();
+            wrapper
+                .Setup(_ => _.CreateCommand())
+                .Returns(command.Object);
+
+            var factory = new Func<string, SqlConnectionWrapper>((s) => wrapper.Object);
+            
+            var builder = new MsSqlDataAccessLayer(factory, connection);
+
+            var ds = await builder.SelectDataAsDataSet("select query");
+            Assert.NotNull(ds);
+            Assert.NotEmpty(ds);
+            Assert.True(ds.ElementAtOrDefault(0)?.Columns?.ContainsKey("column-0"));
         }
     }
 }
