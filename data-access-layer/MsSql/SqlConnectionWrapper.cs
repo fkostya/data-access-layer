@@ -1,33 +1,39 @@
-﻿using Microsoft.Data.SqlClient;
-using System.Diagnostics.CodeAnalysis;
+﻿using data_access_layer.Interface;
+using Microsoft.Data.SqlClient;
 
 namespace data_access_layer.MsSql
 {
-    [ExcludeFromCodeCoverage]
-    public class SqlConnectionWrapper(string connectionString = "") : IDisposable
+    public class SqlConnectionWrapper(MsSqlConnection connection) : IDbConnectionWrapper<SqlConnectionStringBuilder>, IDisposable
     {
-        private readonly SqlConnection connection = new(connectionString);
+        private readonly MsSqlConnection _connection = connection;
+        private readonly SqlConnection instance = new(connection?.GetConnection()?.ConnectionString);
 
-        public static SqlConnectionWrapper Default(string connectionString)
+        public IConnection<SqlConnectionStringBuilder> Connection => _connection;
+
+        public static SqlConnectionWrapper Default(MsSqlConnection connection)
         {
-            return new SqlConnectionWrapper(connectionString);
+            return new SqlConnectionWrapper(connection);
         }
 
         public virtual async Task OpenAsync(CancellationToken cancellationToken = default)
         {
-            await connection.OpenAsync(cancellationToken);
+            await instance.OpenAsync(cancellationToken);
         }
 
         public virtual SqlCommandWrapper CreateCommand()
         {
-            return new SqlCommandWrapper(connection.CreateCommand());
+            return new SqlCommandWrapper(instance.CreateCommand());
         }
 
         public virtual Task CloseAsync()
         {
-            return connection.CloseAsync();
+            return instance.CloseAsync();
         }
 
-        public void Dispose() => connection.Dispose();
+        public void Dispose()
+        {
+            GC.SuppressFinalize(this);
+            instance.Dispose();
+        }
     }
 }

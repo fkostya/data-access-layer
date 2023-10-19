@@ -6,7 +6,7 @@ namespace data_access_layer.MsSql
     [ExcludeFromCodeCoverage]
     public class SqlCommandWrapper(SqlCommand command) : IDisposable
     {
-        private readonly SqlCommand _command = command;
+        private readonly SqlCommandWrapper _command = new(command);
 
         public SqlCommandWrapper()
             : this(new SqlCommand())
@@ -19,11 +19,15 @@ namespace data_access_layer.MsSql
             get { return _command.CommandText; }
         }
 
-        public virtual async Task<SqlDataReader> ExecuteReaderAsync(CancellationToken cancellationToken = default)
+        public virtual async Task<SqlDataReaderWrapper> ExecuteReaderAsync(CancellationToken cancellationToken = default)
         {
             return await _command.ExecuteReaderAsync(cancellationToken);
         }
 
-        public void Dispose() => _command.Dispose();
+        public void Dispose()
+        {
+            GC.SuppressFinalize(this);
+            _command.Dispose();
+        }
     }
 }

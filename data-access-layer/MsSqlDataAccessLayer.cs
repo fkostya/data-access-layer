@@ -1,55 +1,38 @@
-﻿using data_access_layer.MsSql;
-using log4net;
+﻿using data_access_layer.Interface;
+using data_access_layer.MsSql;
 using Microsoft.Data.SqlClient;
+using Serilog;
 using System.Diagnostics;
 
 namespace data_access_layer
 {
-    public class MsSqlDataAccessLayer(string connectionString, string userid, string userpassword, int connection_timeout = 1000)
+    public class MsSqlDataAccessLayer(MsSqlConnection connection, Func<MsSqlConnection, IDbConnectionWrapper<SqlConnectionStringBuilder>> factory)
     {
-        private static readonly ILog log = LogManager.GetLogger(typeof(MsSqlDataAccessLayer));
-        private readonly int _connection_timeout = connection_timeout;
-        private readonly string _connectionString = connectionString;
-        private readonly string _userid = userid;
-        private readonly string _userpassword = userpassword;
-        private readonly Func<string, SqlConnectionWrapper> _factory = (string connectionString) => SqlConnectionWrapper.Default(connectionString);
-
-        public bool ValidConnection => !string.IsNullOrEmpty(_connectionString);
+        private readonly IDbConnectionWrapper<SqlConnectionStringBuilder> _factory = factory.Invoke(connection);
 
         #region ctor
-        public MsSqlDataAccessLayer(Func<string, SqlConnectionWrapper> factory, Dictionary<string, string> connection)
-            : this(connection)
-        {
-            _factory = factory;
-        }
-
-        public MsSqlDataAccessLayer(string connectionString, int connection_timeout = 1000)
-            : this(connectionString, "", "", connection_timeout)
+        public MsSqlDataAccessLayer(MsSqlConnection connection)
+            : this(connection, new Func<MsSqlConnection, SqlConnectionWrapper>((c) => SqlConnectionWrapper.Default(c)))
         {
         }
 
-        public MsSqlDataAccessLayer(Dictionary<string, string> msSqlAccess, int connection_timeout = 1000)
-            : this("", msSqlAccess.GetValueOrDefault("userid") ?? "", msSqlAccess.GetValueOrDefault("userpassword") ?? "", connection_timeout)
-        {
-            msSqlAccess ??= [];
-            //must be specified fields to establish connection to ms sql server
-            if (msSqlAccess.TryGetValue("server", out string? server) && msSqlAccess.TryGetValue("database", out string? database))
-            {
-                _connectionString = $@"Server={server};
-                                                Database={database}
-                                                    {(msSqlAccess.TryGetValue("port", out string? port) ? $",{port}" : "")};
-                                                {(!string.IsNullOrEmpty(_userid) ? $"User Id ={_userid}" : "")};
-                                                {(!string.IsNullOrEmpty(_userpassword) ? $"Password ={_userpassword}" : "")};";
-            }
-        }
+        //public MsSqlDataAccessLayer(MsSqlConnection connection)
+        //{
+        //    _connection = connection;
+        //    ////must be specified fields to establish connection to ms sql server
+        //    //if (msSqlAccess.TryGetValue("server", out string? server) && msSqlAccess.TryGetValue("database", out string? database))
+        //    //{
+        //    //    _connectionString = $@"Server={server};
+        //    //                                    Database={database}
+        //    //                                        {(msSqlAccess.TryGetValue("port", out string? port) ? $",{port}" : "")};
+        //    //                                    {(!string.IsNullOrEmpty(_userid) ? $"User Id ={_userid}" : "")};
+        //    //                                    {(!string.IsNullOrEmpty(_userpassword) ? $"Password ={_userpassword}" : "")};";
+        //    //}
+        //}
         #endregion
 
-        public virtual SqlConnection GetConnection(string connectionString) {
-            return new SqlConnection(connectionString);
-        }
-        
-        public async Task<IEnumerable<MsSqlDataSet>> SelectDataAsDataSet(string sql_query_text, CancellationToken cancellationToken = default) {
-            if (string.IsNullOrEmpty(sql_query_text) || !ValidConnection)
+        public async Task<IEnumerable<MsSqlDataSet>> SelectDataAsDataSetAsync(string sql_query_text, CancellationToken cancellationToken = default) {
+            if (string.IsNullOrEmpty(sql_query_text) || _factory.Connection  == null || !(await _factory.Connection.IsValidAsync()))
                 return Array.Empty<MsSqlDataSet>();
 
             Stopwatch sw = new();
@@ -57,16 +40,12 @@ namespace data_access_layer
 
             try
             {
-                var builder = new SqlConnectionStringBuilder(_connectionString)
-                {
-                    ConnectTimeout = _connection_timeout,
-                };
+                Log.Debug("ConnectionString {@ConnectionString} query {@Query}", _factory.Connection.GetConnection(), sql_query_text);
 
-                log.DebugFormat("ConnectionString {ConnectionString} query {Query}", builder, sql_query_text);
+                await _factory.OpenAsync(cancellationToken);
+                using var command = _factory.CreateCommand();
+                if(command == null) return Enumerable.Empty<MsSqlDataSet>();
 
-                using var connection = _factory.Invoke(builder.ConnectionString);
-                await connection.OpenAsync(cancellationToken);
-                using var command = connection.CreateCommand();
                 command.CommandText = sql_query_text;
 
                 using var reader = await command.ExecuteReaderAsync(cancellationToken);
@@ -74,40 +53,51 @@ namespace data_access_layer
 
                 var list = new List<MsSqlDataSet>();
 
-                do
+                try
                 {
-                    var columns = await reader.GetColumnSchemaAsync(cancellationToken);
-
-                    var dataset = new MsSqlDataSet();
-                    foreach (var column in columns)
+                    do
                     {
-                        dataset.AddColumn(column);
-                    }
+                        var columns = await reader.GetColumnSchemaAsync(cancellationToken);
+                        if (columns.Count == 0) continue;
 
-                    while (await reader.ReadAsync(cancellationToken))
-                    {
-                        //read single row
-                        var row = new Dictionary<string, object>();
-                        foreach (var column in dataset.Columns)
+                        var dataset = new MsSqlDataSet();
+                        foreach (var column in columns)
                         {
-                            row[column.Key] = reader[column.Key];
+                            dataset.AddColumn(column);
                         }
-                        dataset.Add(row);
-                    }
-                    list.Add(dataset);
-                } while (await reader.NextResultAsync(cancellationToken));
 
-                await connection.CloseAsync();
+                        while (await reader.ReadAsync(cancellationToken))
+                        {
+                            //read single row
+                            var row = new Dictionary<string, object>();
+                            foreach (var column in dataset.Columns)
+                            {
+                                row[column.Key] = reader[column.Key];
+                            }
+                            dataset.Add(row);
+                        }
+                        list.Add(dataset);
+                    } while (await reader.NextResultAsync(cancellationToken));
+                }
+                catch
+                {
+                    throw;
+                }
+                finally
+                {
+                    await _factory.CloseAsync();
+                }
+
                 return list;
             }
             catch (Exception ex)
             {
-                log.Error(ex.Message, ex);
+                Log.Error(ex.Message, ex);
             }
             finally
             {
                 sw.Stop();
-                log.DebugFormat("{SqlTotalExecutionTime} total query run time for {ConnectionString}", sw.Elapsed, _connectionString);
+                Log.Debug("{@SqlTotalExecutionTime} total query run time for {@ConnectionString}", sw.Elapsed, (_factory.Connection as MsSqlConnection)?.GetConnection().ConnectionString);
             }
 
             return Array.Empty<MsSqlDataSet>();

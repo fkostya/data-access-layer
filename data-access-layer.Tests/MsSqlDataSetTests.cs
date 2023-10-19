@@ -1,23 +1,22 @@
-﻿using data_access_layer;
-using Moq;
+﻿using Moq;
 using System.Data.Common;
 using System.Reflection;
 
-namespace data_access_layer_tests
+namespace data_access_layer.Tests
 {
     public class MsSqlDataSetTests
     {
         [Fact]
         public void MsSqlDataSet_NewInstance_IsNotNull()
         {
-            MsSqlDataSet ds = new MsSqlDataSet();
+            MsSqlDataSet ds = new();
             Assert.NotNull(ds);
         }
 
         [Fact]
         public void MsSqlDataSet_AddRow_RowCountIsOne()
         {
-            MsSqlDataSet ds = new MsSqlDataSet();
+            MsSqlDataSet ds = new();
             ds.Add(new Dictionary<string, object> { { "row-0", new object() } });
 
             Assert.NotEmpty(ds[0]);
@@ -26,7 +25,7 @@ namespace data_access_layer_tests
         [Fact]
         public void MsSqlDataSet_AddColumn_RowCountIsOne()
         {
-            MsSqlDataSet ds = new MsSqlDataSet();
+            MsSqlDataSet ds = new();
             var mockDbColumn = new Mock<DbColumn>();
 
             var col = mockDbColumn.Object.GetType().GetProperty(nameof(mockDbColumn.Object.ColumnName), BindingFlags.Public | BindingFlags.Instance);
