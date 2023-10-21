@@ -35,7 +35,7 @@ namespace data_access_layer.Tests.MsSql
             var columns = await wrapper.GetColumnSchemaAsync();
 
             Assert.NotEmpty(columns);
-            Assert.Equal("column-0", columns?.FirstOrDefault()?.ColumnName);
+            Assert.Equal("column-0", (columns?.FirstOrDefault() as DbColumnStub)?.ColumnName);
         }
 
         [Fact]
