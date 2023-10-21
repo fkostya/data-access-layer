@@ -1,0 +1,25 @@
+﻿name: data-access-layer CI
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v4
+        with:
+            fetch-depth: 0
+      
+      - name: install dotnet '8.0.100-rc.1.23455.8'
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '8.0.100-rc.1.23455.8'
+
+      - name: restore dependencies
+        run: dotnet restore
+
+      - name: unit test
+        run: dotnet test
