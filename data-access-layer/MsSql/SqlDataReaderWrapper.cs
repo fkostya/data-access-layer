@@ -1,26 +1,17 @@
-﻿using Microsoft.Data.SqlClient;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Data;
 using System.Data.Common;
-using System.Diagnostics.CodeAnalysis;
 
 namespace data_access_layer.MsSql
 {
-    [ExcludeFromCodeCoverage]
-    public class SqlDataReaderWrapper : IAsyncDisposable, IDisposable
+    public class SqlDataReaderWrapper(DbDataReader? dbReader) : IAsyncDisposable, IDisposable
     {
-        private readonly SqlDataReader? reader;
+        private readonly DbDataReader? reader = dbReader;
 
         #region ctor
-        public SqlDataReaderWrapper()
+        public SqlDataReaderWrapper() : this(null)
         {
 
-        }
-
-        public SqlDataReaderWrapper(SqlDataReader sqlDataReader)
-            : this()
-        {
-            reader = sqlDataReader;
         }
         #endregion
 
