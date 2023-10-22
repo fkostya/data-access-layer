@@ -9,7 +9,7 @@ namespace appUI
             InitializeComponent();
         }
 
-        private async void button1_Click(object sender, EventArgs e)
+        private void button1_Click(object sender, EventArgs e)
         {
             //
             //var sql = new MsSqlDataAccessLayer("Server=(localdb)\\MSSQLLocalDB;Database=test;Trusted_Connection=True;");
