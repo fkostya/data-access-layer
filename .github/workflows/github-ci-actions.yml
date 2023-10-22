@@ -1,6 +1,11 @@
 ﻿name: data-access-layer CI
 
-on: [push]
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+  workflow_dispatch:
 
 jobs:
   build:
@@ -22,6 +27,7 @@ jobs:
         run: dotnet restore
 
       - name: build
+      - uses: actions/setup-dotnet@v3
       - run: |
          dotnet build --configuration Release --no-restore
          dotnet publish -c Release -o ./published
