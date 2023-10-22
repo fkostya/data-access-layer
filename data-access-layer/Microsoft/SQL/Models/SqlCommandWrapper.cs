@@ -1,7 +1,7 @@
 ﻿using Microsoft.Data.SqlClient;
 using System.Diagnostics.CodeAnalysis;
 
-namespace data_access_layer.MsSql
+namespace data_access_layer.Microsoft.SQL.Models
 {
     [ExcludeFromCodeCoverage]
     public class SqlCommandWrapper(SqlCommand command) : IDisposable
@@ -15,7 +15,7 @@ namespace data_access_layer.MsSql
 
         public virtual string CommandText
         {
-            set { _command.CommandText = value;}
+            set { _command.CommandText = value; }
             get { return _command.CommandText; }
         }
 

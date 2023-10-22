@@ -1,7 +1,7 @@
 ﻿using data_access_layer.Interface;
 using Microsoft.Data.SqlClient;
 
-namespace data_access_layer.MsSql
+namespace data_access_layer.Microsoft.SQL.Models
 {
     public class SqlConnectionWrapper(MsSqlConnection connection) : IDbConnectionWrapper<SqlConnectionStringBuilder>, IDisposable
     {

@@ -1,7 +1,7 @@
 using data_access_layer.Interface;
-using data_access_layer.MsSql;
+using data_access_layer.Microsoft.SQL;
+using data_access_layer.Microsoft.SQL.Models;
 using Microsoft.Data.SqlClient;
-using Microsoft.VisualBasic;
 using Moq;
 using System.Collections.ObjectModel;
 using System.Data.Common;

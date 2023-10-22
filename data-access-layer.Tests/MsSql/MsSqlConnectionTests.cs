@@ -1,4 +1,4 @@
-﻿using data_access_layer.MsSql;
+﻿using data_access_layer.Microsoft.SQL.Models;
 
 namespace data_access_layer.Tests.MsSql
 {

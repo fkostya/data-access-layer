@@ -1,10 +1,10 @@
 ﻿using data_access_layer.Interface;
-using data_access_layer.MsSql;
+using data_access_layer.Microsoft.SQL.Models;
 using Microsoft.Data.SqlClient;
 using Serilog;
 using System.Diagnostics;
 
-namespace data_access_layer
+namespace data_access_layer.Microsoft.SQL
 {
     public class MsSqlDataAccessLayer(MsSqlConnection connection, Func<MsSqlConnection, IDbConnectionWrapper<SqlConnectionStringBuilder>> factory)
     {
@@ -31,8 +31,9 @@ namespace data_access_layer
         //}
         #endregion
 
-        public async Task<IEnumerable<MsSqlDataSet>> SelectDataAsDataSetAsync(string sql_query_text, CancellationToken cancellationToken = default) {
-            if (string.IsNullOrEmpty(sql_query_text) || _factory.Connection  == null || !(await _factory.Connection.IsValidAsync()))
+        public async Task<IEnumerable<MsSqlDataSet>> SelectDataAsDataSetAsync(string sql_query_text, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrEmpty(sql_query_text) || _factory.Connection == null || !await _factory.Connection.IsValidAsync())
                 return Array.Empty<MsSqlDataSet>();
 
             Stopwatch sw = new();
@@ -44,7 +45,7 @@ namespace data_access_layer
 
                 await _factory.OpenAsync(cancellationToken);
                 using var command = _factory.CreateCommand();
-                if(command == null) return Enumerable.Empty<MsSqlDataSet>();
+                if (command == null) return Enumerable.Empty<MsSqlDataSet>();
 
                 command.CommandText = sql_query_text;
 

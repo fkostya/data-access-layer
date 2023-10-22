@@ -2,7 +2,7 @@
 using System.Data;
 using System.Data.Common;
 
-namespace data_access_layer.MsSql
+namespace data_access_layer.Microsoft.SQL.Models
 {
     public class SqlDataReaderWrapper(DbDataReader? dbReader) : IAsyncDisposable, IDisposable
     {
@@ -31,7 +31,7 @@ namespace data_access_layer.MsSql
 
         public virtual Task<bool> ReadAsync(CancellationToken cancellationToken = default)
         {
-            return reader?.ReadAsync(cancellationToken) ?? Task.FromResult<bool>(false);
+            return reader?.ReadAsync(cancellationToken) ?? Task.FromResult(false);
         }
 
         public virtual object? GetValueOrDefault(string key, object? @default = default)
@@ -41,13 +41,13 @@ namespace data_access_layer.MsSql
 
         public virtual Task<ReadOnlyCollection<DbColumn>> GetColumnSchemaAsync(CancellationToken cancellationToken = default)
         {
-            return reader?.GetColumnSchemaAsync(cancellationToken) 
+            return reader?.GetColumnSchemaAsync(cancellationToken)
                 ?? Task.FromResult(new ReadOnlyCollection<DbColumn>(new List<DbColumn>()));
         }
 
         public virtual Task<bool> NextResultAsync(CancellationToken cancellationToken = default)
         {
-            return reader?.NextResultAsync(cancellationToken) ?? Task.FromResult<bool>(false);
+            return reader?.NextResultAsync(cancellationToken) ?? Task.FromResult(false);
         }
 
         public virtual void Close()
