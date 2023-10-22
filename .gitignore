@@ -19,3 +19,5 @@ appui/bin/
 /.vs/data-access-layer/DesignTimeBuild/
 /.vs/data-access-layer/DesignTimeBuild/.dtbcache.v2
 /.vs/data-access-layer/DesignTimeBuild/.dtbcache.v2
+/published
+/data-access--layer.Tests/TestResults

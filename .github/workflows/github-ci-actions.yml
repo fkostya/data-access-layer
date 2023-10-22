@@ -21,5 +21,24 @@ jobs:
       - name: restore dependencies
         run: dotnet restore
 
-      - name: unit test
-        run: dotnet test
+      - name: build
+      - run: |
+         dotnet build --configuration Release --no-restore
+         dotnet publish -c Release -o ./published
+
+      - name:
+        run: dotnet test --no-restore --verbosity normal -p:CollectCoverage=true -p:CoverletOutput=TestResults/ -p:CoverletOutputFormat=opencover
+
+      - name: .Net Code Coverage Badge
+        uses: simon-k/dotnet-code-coverage-badge@v2.0.0
+        id: create_coverage_badge
+        with:
+            label: unit test coverage
+            color: green
+            path: data-access-layer.Tests\TestResults\coverage.opencover.xml
+            gist-filename: code-coverage.json
+            gist-id: 6139c93439673c361cd0aebd8462e298
+            gist-auth-token: ${{ secrets.GIST_AUTH_TOKEN }}
+
+      - name: print code coverage
+        run: echo "Code coverage percentage ${{steps.create_coverage_badge.outputs.percentage}}%"

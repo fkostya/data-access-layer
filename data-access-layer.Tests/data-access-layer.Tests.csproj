@@ -28,4 +28,8 @@
     <ProjectReference Include="..\data-access-layer\data-access-layer.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="TestResults\" />
+  </ItemGroup>
+
 </Project>
