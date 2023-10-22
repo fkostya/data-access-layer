@@ -18,10 +18,10 @@ jobs:
         with:
             fetch-depth: 0
       
-      - name: install dotnet '8.0.0-rc.2.23480.2'
+      - name: install dotnet '8.0.100-rc.2.23502.2'
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: '8.0.0-rc.2.23480.2'
+          dotnet-version: '8.0.100-rc.2.23502.2'
 
       - name: restore dependencies
         run: dotnet restore
