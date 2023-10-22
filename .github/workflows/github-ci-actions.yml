@@ -34,16 +34,15 @@ jobs:
       - name:
         run: dotnet test --no-restore --verbosity normal -p:CollectCoverage=true -p:CoverletOutput=TestResults/ -p:CoverletOutputFormat=opencover
 
-      - name: .Net Code Coverage Badge
-        uses: simon-k/dotnet-code-coverage-badge@v1.0.0
-        id: create_coverage_badge
+      - name: code coverage report
+        uses: irongut/CodeCoverageSummary@v1.3.0
         with:
-            label: unit test coverage
-            color: green
-            path: data-access-layer.Tests\TestResults\coverage.opencover.xml
-            gist-filename: code-coverage.json
-            gist-id: 6139c93439673c361cd0aebd8462e298
-            gist-auth-token: ${{ secrets.GIST_AUTH_TOKEN }}
-
-      - name: print code coverage
-        run: echo "Code coverage percentage ${{steps.create_coverage_badge.outputs.percentage}}%"
+          filename: coverage/**/coverage.cobertura.xml
+          badge: true
+          fail_below_min: true
+          format: markdown
+          hide_branch_rate: false
+          hide_complexity: true
+          indicators: true
+          output: both
+          thresholds: '60 80'
