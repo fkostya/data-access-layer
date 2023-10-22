@@ -34,9 +34,9 @@ namespace data_access_layer.MsSql
             return reader?.ReadAsync(cancellationToken) ?? Task.FromResult<bool>(false);
         }
 
-        public virtual object GetValue(string key)
+        public virtual object? GetValueOrDefault(string key, object? @default = default)
         {
-            return reader?.GetValue(key) ?? new object();
+            return reader?.GetValue(key) ?? @default;
         }
 
         public virtual Task<ReadOnlyCollection<DbColumn>> GetColumnSchemaAsync(CancellationToken cancellationToken = default)

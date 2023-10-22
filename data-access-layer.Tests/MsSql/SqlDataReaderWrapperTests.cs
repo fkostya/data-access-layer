@@ -116,5 +116,72 @@ namespace data_access_layer.Tests.MsSql
             Assert.NotNull(db);
             Assert.Equal("unit-test-table-0", db.TableName);
         }
+
+        [Fact]
+        public async Task ReadAsync_NoDbReaderProvided_NoReadFalse()
+        {
+            var reader = new Mock<DbDataReader>();
+
+            reader
+                .Setup(_ => _.ReadAsync(It.IsAny<CancellationToken>()))
+                .ReturnsAsync(false);
+
+            SqlDataReaderWrapper wrapper = new(reader.Object);
+            var read = await wrapper.ReadAsync();
+
+            Assert.False(read);
+        }
+
+        [Fact]
+        public async Task ReadAsync_DbReaderProvided_HasReadTrue()
+        {
+            var reader = new Mock<DbDataReader>();
+
+            reader
+                .Setup(_ => _.ReadAsync(It.IsAny<CancellationToken>()))
+                .ReturnsAsync(true);
+
+            SqlDataReaderWrapper wrapper = new(reader.Object);
+            var read = await wrapper.ReadAsync();
+
+            Assert.True(read);
+        }
+
+        [Fact]
+        public void GetValue_NoDbReaderProvided_ObjectAsNull()
+        {
+            var reader = new Mock<DbDataReader>();
+
+            SqlDataReaderWrapper wrapper = new(reader.Object);
+            var value = wrapper.GetValueOrDefault(It.IsAny<string>());
+
+            Assert.Null(value);
+        }
+
+        [Fact]
+        public void GetValue_NoDbReaderProvided_ObjectAsEmpty()
+        {
+            var reader = new Mock<DbDataReader>();
+
+            SqlDataReaderWrapper wrapper = new(reader.Object);
+            var value = wrapper.GetValueOrDefault(It.IsAny<string>(), new object());
+
+            Assert.NotNull(value);
+        }
+
+        //[Fact]
+        //public void GetValue_DbReaderProvided_ObjectAsEmpty()
+        //{
+        //    var reader = new Mock<DbDataReader>();
+
+        //    reader
+        //        .Setup(_ => _.GetValue(It.IsAny<string>()))
+        //        .Returns(new object());
+
+        //    SqlDataReaderWrapper wrapper = new(reader.Object);
+        //    var value = wrapper.GetValueOrDefault(It.IsAny<string>());
+
+        //    Assert.NotNull(value);
+        //}
     }
 }
