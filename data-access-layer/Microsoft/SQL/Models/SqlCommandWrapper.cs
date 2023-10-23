@@ -4,7 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 namespace data_access_layer.Microsoft.SQL.Models
 {
     [ExcludeFromCodeCoverage]
-    public class SqlCommandWrapper(SqlCommand command) : IDisposable
+    public class SqlCommandWrapper(SqlCommand command) : IAsyncDisposable
     {
         private readonly SqlCommandWrapper _command = new(command);
 
@@ -24,10 +24,9 @@ namespace data_access_layer.Microsoft.SQL.Models
             return await _command.ExecuteReaderAsync(cancellationToken);
         }
 
-        public void Dispose()
+        public ValueTask DisposeAsync()
         {
-            GC.SuppressFinalize(this);
-            _command.Dispose();
+            return _command.DisposeAsync();
         }
     }
 }

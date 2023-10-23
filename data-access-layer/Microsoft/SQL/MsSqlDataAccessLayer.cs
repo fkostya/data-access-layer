@@ -44,12 +44,12 @@ namespace data_access_layer.Microsoft.SQL
                 Log.Debug("ConnectionString {@ConnectionString} query {@Query}", _factory.Connection.GetConnection(), sql_query_text);
 
                 await _factory.OpenAsync(cancellationToken);
-                using var command = _factory.CreateCommand();
+                await using var command = _factory.CreateCommand();
                 if (command == null) return Enumerable.Empty<MsSqlDataSet>();
 
                 command.CommandText = sql_query_text;
 
-                using var reader = await command.ExecuteReaderAsync(cancellationToken);
+                await using var reader = await command.ExecuteReaderAsync(cancellationToken);
                 if (reader == null || !reader.HasRows) return Enumerable.Empty<MsSqlDataSet>();
 
                 var list = new List<MsSqlDataSet>();

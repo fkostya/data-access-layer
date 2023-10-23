@@ -1,6 +1,6 @@
 ﻿using data_access_layer.Microsoft.SQL.Models;
 
-namespace data_access_layer.Tests.MsSql
+namespace data_access_layer.Tests.Microsoft.SQL
 {
     public class MsSqlConnectionTests
     {

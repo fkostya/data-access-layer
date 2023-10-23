@@ -4,7 +4,7 @@ using System.Data.Common;
 
 namespace data_access_layer.Microsoft.SQL.Models
 {
-    public class SqlDataReaderWrapper(DbDataReader? dbReader) : IAsyncDisposable, IDisposable
+    public class SqlDataReaderWrapper(DbDataReader? dbReader) : IAsyncDisposable
     {
         private readonly DbDataReader? reader = dbReader;
 
@@ -18,11 +18,8 @@ namespace data_access_layer.Microsoft.SQL.Models
         public virtual bool HasRows => reader?.HasRows ?? false;
         public virtual object this[string key] => reader?[key] ?? new object();
 
-        public ValueTask DisposeAsync()
-        {
-            GC.SuppressFinalize(this);
-            return reader?.DisposeAsync() ?? new ValueTask();
-        }
+        public ValueTask DisposeAsync() =>
+            reader?.DisposeAsync() ?? ValueTask.CompletedTask;
 
         public virtual DataTable GetSchemaTable()
         {
@@ -36,7 +33,13 @@ namespace data_access_layer.Microsoft.SQL.Models
 
         public virtual object? GetValueOrDefault(string key, object? @default = default)
         {
-            return reader?.GetValue(key) ?? @default;
+            try
+            {
+                return reader?.GetValue(key) ?? @default;
+            }
+            catch { }
+            
+            return default;
         }
 
         public virtual Task<ReadOnlyCollection<DbColumn>> GetColumnSchemaAsync(CancellationToken cancellationToken = default)
@@ -53,12 +56,6 @@ namespace data_access_layer.Microsoft.SQL.Models
         public virtual void Close()
         {
             reader?.Close();
-        }
-
-        public void Dispose()
-        {
-            GC.SuppressFinalize(this);
-            reader?.Dispose();
         }
     }
 }

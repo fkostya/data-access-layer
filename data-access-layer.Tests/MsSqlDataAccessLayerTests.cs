@@ -31,29 +31,10 @@ namespace data_access_layer.Tests
                 new MsSqlDataAccessLayer(new MsSqlConnection("test-local", "test-db", "test-userid", "test-pwd")));
         }
 
-        //class SqlConnectionStub
-        //{
-
-        //}
         class DbColumnStub(string columnName) : DbColumn
         {
             public new string ColumnName { get; set; } = columnName;
         }
-
-        //class SqlConnectionWrapperStub : SqlConnectionWrapper
-        //{
-        //    private readonly SqlConnectionStub instance;
-
-        //    public SqlConnectionWrapperStub(MsSqlConnection connection)
-        //        : base(connection)
-        //    {
-        //        instance = new();
-        //    }
-        //    public override SqlCommandWrapper CreateCommand()
-        //    {
-        //        return new DbCommandStub();
-        //    }
-        //}
 
         [Fact]
         public void MsSqlDataAccessLayer_FactoryInvokeNoConnection_ConectionIsNull()
@@ -85,8 +66,6 @@ namespace data_access_layer.Tests
             Assert.NotNull(_connection);
             Assert.Equal(connection, _connection);
         }
-
-        
          
         [Fact]
         public async Task MsSqlDataAccessLayer_Full_ReadDataSet()

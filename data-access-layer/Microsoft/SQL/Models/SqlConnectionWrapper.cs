@@ -3,7 +3,7 @@ using Microsoft.Data.SqlClient;
 
 namespace data_access_layer.Microsoft.SQL.Models
 {
-    public class SqlConnectionWrapper(MsSqlConnection connection) : IDbConnectionWrapper<SqlConnectionStringBuilder>, IDisposable
+    public class SqlConnectionWrapper(MsSqlConnection connection) : IDbConnectionWrapper<SqlConnectionStringBuilder>, IAsyncDisposable
     {
         private readonly MsSqlConnection _connection = connection;
         private readonly SqlConnection instance = new(connection?.GetConnection()?.ConnectionString);
@@ -30,10 +30,7 @@ namespace data_access_layer.Microsoft.SQL.Models
             return instance.CloseAsync();
         }
 
-        public void Dispose()
-        {
-            GC.SuppressFinalize(this);
-            instance.Dispose();
-        }
+        public ValueTask DisposeAsync() =>
+            instance.DisposeAsync();
     }
 }

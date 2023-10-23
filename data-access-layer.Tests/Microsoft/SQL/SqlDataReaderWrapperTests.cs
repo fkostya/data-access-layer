@@ -4,10 +4,12 @@ using System.Collections.ObjectModel;
 using System.Data;
 using System.Data.Common;
 
-namespace data_access_layer.Tests.MsSql
+namespace data_access_layer.Tests.Microsoft.SQL
 {
     public class SqlDataReaderWrapperTests
     {
+        private readonly Mock<DbDataReader> reader = new();
+
         public class DbColumnStub(string columnName) : DbColumn
         {
             public new string ColumnName { get; set; } = columnName;
@@ -25,8 +27,6 @@ namespace data_access_layer.Tests.MsSql
         [Fact]
         public async Task GetColumnSchemaAsync_DbReaderProvided_NotEmptyColumns()
         {
-            var reader = new Mock<DbDataReader>();
-
             reader
                 .Setup(_ => _.GetColumnSchemaAsync(It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new ReadOnlyCollection<DbColumn>(new List<DbColumn>() { new DbColumnStub("column-0") }));
@@ -41,8 +41,6 @@ namespace data_access_layer.Tests.MsSql
         [Fact]
         public async Task NextResultAsync_DbReaderProvided_HasNextResultTrue()
         {
-            var reader = new Mock<DbDataReader>();
-
             reader
                 .Setup(_ => _.NextResultAsync(It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true);
@@ -56,8 +54,6 @@ namespace data_access_layer.Tests.MsSql
         [Fact]
         public async Task NextResultAsync_DbReaderProvided_HasLastResultFalse()
         {
-            var reader = new Mock<DbDataReader>();
-
             reader
                 .SetupSequence(_ => _.NextResultAsync(It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true)
@@ -73,13 +69,11 @@ namespace data_access_layer.Tests.MsSql
         [Fact]
         public async Task NextResultAsync_NoDbReaderProvided_HasNextResultFalse()
         {
-            var reader = new Mock<DbDataReader>();
-
             reader
                 .Setup(_ => _.NextResultAsync(It.IsAny<CancellationToken>()))
                 .ReturnsAsync(false);
 
-            SqlDataReaderWrapper wrapper = new(reader.Object);
+            SqlDataReaderWrapper wrapper = new();
             var next = await wrapper.NextResultAsync();
 
             Assert.False(next);
@@ -88,13 +82,11 @@ namespace data_access_layer.Tests.MsSql
         [Fact]
         public void GetSchemaTable_NoDbReaderProvided_EmptyDataTable()
         {
-            var reader = new Mock<DbDataReader>();
-
             reader
                 .Setup(_ => _.GetSchemaTable())
                 .Returns(new DataTable());
 
-            SqlDataReaderWrapper wrapper = new(reader.Object);
+            SqlDataReaderWrapper wrapper = new();
             var db = wrapper.GetSchemaTable();
 
             Assert.NotNull(db);
@@ -103,7 +95,6 @@ namespace data_access_layer.Tests.MsSql
         [Fact]
         public void GetSchemaTable_DbReaderProvided_NotEmptyDataTable()
         {
-            var reader = new Mock<DbDataReader>();
             var table = new DataTable("unit-test-table-0");
 
             reader
@@ -120,13 +111,11 @@ namespace data_access_layer.Tests.MsSql
         [Fact]
         public async Task ReadAsync_NoDbReaderProvided_NoReadFalse()
         {
-            var reader = new Mock<DbDataReader>();
-
             reader
                 .Setup(_ => _.ReadAsync(It.IsAny<CancellationToken>()))
                 .ReturnsAsync(false);
 
-            SqlDataReaderWrapper wrapper = new(reader.Object);
+            SqlDataReaderWrapper wrapper = new();
             var read = await wrapper.ReadAsync();
 
             Assert.False(read);
@@ -135,8 +124,6 @@ namespace data_access_layer.Tests.MsSql
         [Fact]
         public async Task ReadAsync_DbReaderProvided_HasReadTrue()
         {
-            var reader = new Mock<DbDataReader>();
-
             reader
                 .Setup(_ => _.ReadAsync(It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true);
@@ -150,9 +137,7 @@ namespace data_access_layer.Tests.MsSql
         [Fact]
         public void GetValue_NoDbReaderProvided_ObjectAsNull()
         {
-            var reader = new Mock<DbDataReader>();
-
-            SqlDataReaderWrapper wrapper = new(reader.Object);
+            SqlDataReaderWrapper wrapper = new();
             var value = wrapper.GetValueOrDefault(It.IsAny<string>());
 
             Assert.Null(value);
@@ -161,27 +146,106 @@ namespace data_access_layer.Tests.MsSql
         [Fact]
         public void GetValue_NoDbReaderProvided_ObjectAsEmpty()
         {
-            var reader = new Mock<DbDataReader>();
-
-            SqlDataReaderWrapper wrapper = new(reader.Object);
+            SqlDataReaderWrapper wrapper = new();
             var value = wrapper.GetValueOrDefault(It.IsAny<string>(), new object());
 
             Assert.NotNull(value);
         }
 
-        //[Fact]
-        //public void GetValue_DbReaderProvided_ObjectAsEmpty()
-        //{
-        //    var reader = new Mock<DbDataReader>();
+        [Fact]
+        public void GetValue_DbReaderProvided_ObjectAsEmpty()
+        {
+            reader
+                .Setup(_ => _.GetValue(It.IsAny<int>()))
+                .Returns(new object());
+            reader
+                .Setup(_ => _.GetOrdinal(It.IsAny<string>()))
+                .Returns(0);
 
-        //    reader
-        //        .Setup(_ => _.GetValue(It.IsAny<string>()))
-        //        .Returns(new object());
+            SqlDataReaderWrapper wrapper = new(reader.Object);
+            var value = wrapper.GetValueOrDefault(It.IsAny<string>());
 
-        //    SqlDataReaderWrapper wrapper = new(reader.Object);
-        //    var value = wrapper.GetValueOrDefault(It.IsAny<string>());
+            Assert.NotNull(value);
+        }
 
-        //    Assert.NotNull(value);
-        //}
+        [Fact]
+        public void Close_NoDbReaderProvided_NoException()
+        {
+            SqlDataReaderWrapper wrapper = new();
+           
+            wrapper.Close();
+        }
+
+        [Fact]
+        public void Close_DbReaderProvided_CloseIsCalledOnce()
+        {
+            reader
+                .Setup(x => x.Close())
+                .Verifiable();
+
+            SqlDataReaderWrapper wrapper = new(reader.Object);
+
+            wrapper.Close();
+        }
+
+        [Fact]
+        public async Task DisposeAsync_NoDbReaderProvided_DisposeAsyncCalledOnce()
+        {
+            reader
+                .Setup(x => x.DisposeAsync())
+                .Verifiable();
+
+            SqlDataReaderWrapper wrapper = new();
+
+            await wrapper.DisposeAsync();
+        }
+
+        [Fact]
+        public void HasRow_NoDbReaderProvided_NoRowsFalse()
+        {
+            SqlDataReaderWrapper wrapper = new();
+
+            var noRows = wrapper.HasRows;
+
+            Assert.False(noRows);
+        }
+
+        [Fact]
+        public void HasRow_DbReaderProvided_HasRowsTrue()
+        {
+            reader
+                .Setup(x => x.HasRows)
+                .Returns(true);
+
+            SqlDataReaderWrapper wrapper = new(reader.Object);
+
+            var hasRows = wrapper.HasRows;
+
+            Assert.True(hasRows);
+        }
+
+        [Fact]
+        public void Index_NoDbReaderProvided_EmptyObject()
+        {
+            SqlDataReaderWrapper wrapper = new();
+
+            var value = wrapper[It.IsAny<string>()];
+
+            Assert.NotNull(value);
+        }
+
+        [Fact]
+        public void Index_DbReaderProvided_EmptyObject()
+        {
+            reader
+                .Setup(x => x[It.IsAny<string>()])
+                .Returns(new object());
+
+            SqlDataReaderWrapper wrapper = new(reader.Object);
+
+            var value = wrapper[It.IsAny<string>()];
+
+            Assert.NotNull(value);
+        }
     }
 }
