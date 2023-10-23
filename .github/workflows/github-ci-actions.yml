@@ -31,7 +31,7 @@ jobs:
             dotnet build --configuration Release --no-restore
             dotnet publish -c Release -o ./published
 
-      - name:
+      - name: test
         run: dotnet test --no-restore --verbosity normal -p:CollectCoverage=true -p:CoverletOutput=TestResults/ -p:CoverletOutputFormat=opencover
 
       # - name: code coverage report
