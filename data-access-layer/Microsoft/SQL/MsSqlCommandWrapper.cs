@@ -1,14 +1,14 @@
 ﻿using Microsoft.Data.SqlClient;
 using System.Diagnostics.CodeAnalysis;
 
-namespace data_access_layer.Microsoft.SQL.Models
+namespace data_access_layer.Microsoft.SQL
 {
     [ExcludeFromCodeCoverage]
-    public class SqlCommandWrapper(SqlCommand command) : IAsyncDisposable
+    public class MsSqlCommandWrapper(SqlCommand command) : IAsyncDisposable
     {
-        private readonly SqlCommandWrapper _command = new(command);
+        private readonly MsSqlCommandWrapper _command = new(command);
 
-        public SqlCommandWrapper()
+        public MsSqlCommandWrapper()
             : this(new SqlCommand())
         {
         }
@@ -19,7 +19,7 @@ namespace data_access_layer.Microsoft.SQL.Models
             get { return _command.CommandText; }
         }
 
-        public virtual async Task<SqlDataReaderWrapper> ExecuteReaderAsync(CancellationToken cancellationToken = default)
+        public virtual async Task<MsSqlDataReaderWrapper> ExecuteReaderAsync(CancellationToken cancellationToken = default)
         {
             return await _command.ExecuteReaderAsync(cancellationToken);
         }

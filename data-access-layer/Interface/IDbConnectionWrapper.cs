@@ -1,4 +1,4 @@
-﻿using data_access_layer.Microsoft.SQL.Models;
+﻿using data_access_layer.Microsoft.SQL;
 
 namespace data_access_layer.Interface
 {
@@ -10,6 +10,6 @@ namespace data_access_layer.Interface
 
         Task CloseAsync();
 
-        SqlCommandWrapper CreateCommand();
+        MsSqlCommandWrapper CreateCommand();
     }
 }

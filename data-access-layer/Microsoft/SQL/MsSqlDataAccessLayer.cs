@@ -12,7 +12,7 @@ namespace data_access_layer.Microsoft.SQL
 
         #region ctor
         public MsSqlDataAccessLayer(MsSqlConnection connection)
-            : this(connection, new Func<MsSqlConnection, SqlConnectionWrapper>((c) => SqlConnectionWrapper.Default(c)))
+            : this(connection, new Func<MsSqlConnection, MsSqlConnectionWrapper>((c) => MsSqlConnectionWrapper.Default(c)))
         {
         }
 

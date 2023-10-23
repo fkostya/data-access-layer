@@ -1,18 +1,19 @@
 ﻿using data_access_layer.Interface;
+using data_access_layer.Microsoft.SQL.Models;
 using Microsoft.Data.SqlClient;
 
-namespace data_access_layer.Microsoft.SQL.Models
+namespace data_access_layer.Microsoft.SQL
 {
-    public class SqlConnectionWrapper(MsSqlConnection connection) : IDbConnectionWrapper<SqlConnectionStringBuilder>, IAsyncDisposable
+    public class MsSqlConnectionWrapper(MsSqlConnection connection) : IDbConnectionWrapper<SqlConnectionStringBuilder>, IAsyncDisposable
     {
         private readonly MsSqlConnection _connection = connection;
         private readonly SqlConnection instance = new(connection?.GetConnection()?.ConnectionString);
 
         public IConnection<SqlConnectionStringBuilder> Connection => _connection;
 
-        public static SqlConnectionWrapper Default(MsSqlConnection connection)
+        public static MsSqlConnectionWrapper Default(MsSqlConnection connection)
         {
-            return new SqlConnectionWrapper(connection);
+            return new MsSqlConnectionWrapper(connection);
         }
 
         public virtual async Task OpenAsync(CancellationToken cancellationToken = default)
@@ -20,9 +21,9 @@ namespace data_access_layer.Microsoft.SQL.Models
             await instance.OpenAsync(cancellationToken);
         }
 
-        public virtual SqlCommandWrapper CreateCommand()
+        public virtual MsSqlCommandWrapper CreateCommand()
         {
-            return new SqlCommandWrapper(instance.CreateCommand());
+            return new MsSqlCommandWrapper(instance.CreateCommand());
         }
 
         public virtual Task CloseAsync()

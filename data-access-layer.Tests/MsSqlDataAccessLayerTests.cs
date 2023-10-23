@@ -77,8 +77,8 @@ namespace data_access_layer.Tests
                 .Setup(w => w.Connection)
                 .Returns(connection);
 
-            var command = new Mock<SqlCommandWrapper>();
-            var reader = new Mock<SqlDataReaderWrapper>();
+            var command = new Mock<MsSqlCommandWrapper>();
+            var reader = new Mock<MsSqlDataReaderWrapper>();
 
             reader
                 .SetupSequence(_ => _.HasRows)

@@ -2,14 +2,14 @@
 using System.Data;
 using System.Data.Common;
 
-namespace data_access_layer.Microsoft.SQL.Models
+namespace data_access_layer.Microsoft.SQL
 {
-    public class SqlDataReaderWrapper(DbDataReader? dbReader) : IAsyncDisposable
+    public class MsSqlDataReaderWrapper(DbDataReader? dbReader) : IAsyncDisposable
     {
         private readonly DbDataReader? reader = dbReader;
 
         #region ctor
-        public SqlDataReaderWrapper() : this(null)
+        public MsSqlDataReaderWrapper() : this(null)
         {
 
         }
@@ -38,7 +38,7 @@ namespace data_access_layer.Microsoft.SQL.Models
                 return reader?.GetValue(key) ?? @default;
             }
             catch { }
-            
+
             return default;
         }
 
