@@ -4,6 +4,6 @@
     {
         T GetConnection();
 
-        Task<bool> IsValidAsync();
+        bool IsValidConnection();
     }
 }

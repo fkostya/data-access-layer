@@ -33,7 +33,7 @@ namespace data_access_layer.Microsoft.SQL
 
         public async Task<IEnumerable<MsSqlDataSet>> SelectDataAsDataSetAsync(string sql_query_text, CancellationToken cancellationToken = default)
         {
-            if (string.IsNullOrEmpty(sql_query_text) || _factory.Connection == null || !await _factory.Connection.IsValidAsync())
+            if (string.IsNullOrEmpty(sql_query_text) || _factory.Connection == null || !_factory.Connection.IsValidConnection())
                 return Array.Empty<MsSqlDataSet>();
 
             Stopwatch sw = new();

@@ -1,18 +1,18 @@
 ﻿using data_access_layer.Microsoft.SQL.Models;
 
-namespace data_access_layer.Tests.Microsoft.SQL
+namespace data_access_layer.Tests.Microsoft.SQL.Model
 {
     public class MsSqlConnectionTests
     {
         [Fact]
-        public static void MsSqlConnection_NewInstanceStringConnectionAsEmpty_NotNull()
+        public void NewInstanceStringConnectionAsEmpty_NotNull()
         {
             MsSqlConnection connection = new("");
             Assert.NotNull(connection);
         }
 
         [Fact]
-        public static void MsSqlConnection_NewInstanceStringConnectionAsNull_NotNull()
+        public void NewInstanceStringConnectionAsNull_NotNull()
         {
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
             MsSqlConnection connection = new(null);
@@ -21,14 +21,14 @@ namespace data_access_layer.Tests.Microsoft.SQL
         }
 
         [Fact]
-        public static void MsSqlConnection_NewInstanceStringConnectionAsParams_NotNull()
+        public void NewInstanceStringConnectionAsParams_NotNull()
         {
             MsSqlConnection connection = new("server", "database", "userid", "password");
             Assert.NotNull(connection);
         }
 
         [Fact]
-        public static void MsSqlConnection_GetConnection_ConnectionBuilderParams()
+        public void GetConnection_ConnectionBuilderParams()
         {
             MsSqlConnection connection = new("test-server", "test-database", "test-userid", "test-password");
             var connectionBuilder = connection.GetConnection();
@@ -42,7 +42,7 @@ namespace data_access_layer.Tests.Microsoft.SQL
         }
 
         [Fact]
-        public static void MsSqlConnection_GetConnectionFromConnectionString_ConnectionBuilderParams()
+        public void GetConnectionFromConnectionString_ConnectionBuilderParams()
         {
             MsSqlConnection connection = new("test-server", "test-database", "test-userid", "test-password");
             var connectionBuilder = connection.GetConnection();
@@ -57,10 +57,10 @@ namespace data_access_layer.Tests.Microsoft.SQL
         [InlineData("s", "d", "", "p", false)]
         [InlineData("s", "d", "u", "", false)]
         [InlineData("s", "d", "u", "p", true)]
-        public static async Task MsSqlConnection_IsValidAsync_CheckValidConnections(string server, string db, string user, string pwd, bool result)
+        public void IsValidConnection_CheckValidConnections(string server, string db, string user, string pwd, bool result)
         {
             MsSqlConnection connection = new(server, db, user, pwd);
-            var valid = await connection.IsValidAsync();
+            var valid = connection.IsValidConnection();
 
             Assert.Equal(result, valid);
         }
