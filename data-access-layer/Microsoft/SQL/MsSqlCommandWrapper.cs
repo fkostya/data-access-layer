@@ -1,10 +1,11 @@
 ﻿using Microsoft.Data.SqlClient;
+using System.Data.Common;
 using System.Diagnostics.CodeAnalysis;
 
 namespace data_access_layer.Microsoft.SQL
 {
     [ExcludeFromCodeCoverage]
-    public class MsSqlCommandWrapper(SqlCommand command) : IAsyncDisposable
+    public class MsSqlCommandWrapper(DbCommand command) : IAsyncDisposable
     {
         private readonly MsSqlCommandWrapper _command = new(command);
 

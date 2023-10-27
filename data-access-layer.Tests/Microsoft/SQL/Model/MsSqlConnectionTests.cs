@@ -1,13 +1,19 @@
-﻿using data_access_layer.Microsoft.SQL.Models;
+﻿using data_access_layer.Interface;
+using data_access_layer.Microsoft.SQL.Models;
+using Moq;
 
 namespace data_access_layer.Tests.Microsoft.SQL.Model
 {
     public class MsSqlConnectionTests
     {
+        private readonly Mock<IDbFactory> factory = new();
+
         [Fact]
         public void NewInstanceStringConnectionAsEmpty_NotNull()
         {
-            MsSqlConnection connection = new("");
+#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
+            MsSqlConnection connection = new("", null);
+#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
             Assert.NotNull(connection);
         }
 
@@ -15,7 +21,7 @@ namespace data_access_layer.Tests.Microsoft.SQL.Model
         public void NewInstanceStringConnectionAsNull_NotNull()
         {
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            MsSqlConnection connection = new(null);
+            MsSqlConnection connection = new(null, null);
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
             Assert.NotNull(connection);
         }
@@ -23,14 +29,14 @@ namespace data_access_layer.Tests.Microsoft.SQL.Model
         [Fact]
         public void NewInstanceStringConnectionAsParams_NotNull()
         {
-            MsSqlConnection connection = new("server", "database", "userid", "password");
+            MsSqlConnection connection = new("server", "database", "userid", "password", factory.Object);
             Assert.NotNull(connection);
         }
 
         [Fact]
         public void GetConnection_ConnectionBuilderParams()
         {
-            MsSqlConnection connection = new("test-server", "test-database", "test-userid", "test-password");
+            MsSqlConnection connection = new("test-server", "test-database", "test-userid", "test-password", factory.Object);
             var connectionBuilder = connection.GetConnection();
 
             Assert.NotNull(connectionBuilder);
@@ -44,7 +50,7 @@ namespace data_access_layer.Tests.Microsoft.SQL.Model
         [Fact]
         public void GetConnectionFromConnectionString_ConnectionBuilderParams()
         {
-            MsSqlConnection connection = new("test-server", "test-database", "test-userid", "test-password");
+            MsSqlConnection connection = new("test-server", "test-database", "test-userid", "test-password",factory.Object);
             var connectionBuilder = connection.GetConnection();
 
             Assert.NotNull(connectionBuilder);
@@ -59,7 +65,7 @@ namespace data_access_layer.Tests.Microsoft.SQL.Model
         [InlineData("s", "d", "u", "p", true)]
         public void IsValidConnection_CheckValidConnections(string server, string db, string user, string pwd, bool result)
         {
-            MsSqlConnection connection = new(server, db, user, pwd);
+            MsSqlConnection connection = new(server, db, user, pwd, factory.Object);
             var valid = connection.IsValidConnection();
 
             Assert.Equal(result, valid);

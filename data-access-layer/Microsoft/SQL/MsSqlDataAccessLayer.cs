@@ -1,4 +1,5 @@
-﻿using data_access_layer.Interface;
+﻿using data_access_layer.Factory;
+using data_access_layer.Interface;
 using data_access_layer.Microsoft.SQL.Models;
 using Microsoft.Data.SqlClient;
 using Serilog;
@@ -6,15 +7,16 @@ using System.Diagnostics;
 
 namespace data_access_layer.Microsoft.SQL
 {
-    public class MsSqlDataAccessLayer(MsSqlConnection connection, Func<MsSqlConnection, IDbConnectionWrapper<SqlConnectionStringBuilder>> factory)
+    public class MsSqlDataAccessLayer(MsSqlConnection connection/*, Func<MsSqlConnection, IDbConnectionWrapper<SqlConnectionStringBuilder>> factory*/)
     {
-        private readonly IDbConnectionWrapper<SqlConnectionStringBuilder> _factory = factory.Invoke(connection);
+        private readonly MsSqlConnection _connection = connection;
+        //private readonly IDbConnectionWrapper<SqlConnectionStringBuilder> _factory = factory.Invoke(connection);
 
         #region ctor
-        public MsSqlDataAccessLayer(MsSqlConnection connection)
-            : this(connection, new Func<MsSqlConnection, MsSqlConnectionWrapper>((c) => MsSqlConnectionWrapper.Default(c)))
-        {
-        }
+        //public MsSqlDataAccessLayer(MsSqlConnection connection)
+        //    : this(connection, new Func<string, MsSqlConnection>((connectionString) => new MsSqlConnection(connectionString, new DbConnectionFactory())))
+        //{
+        //}
 
         //public MsSqlDataAccessLayer(MsSqlConnection connection)
         //{
@@ -33,7 +35,7 @@ namespace data_access_layer.Microsoft.SQL
 
         public async Task<IEnumerable<MsSqlDataSet>> SelectDataAsDataSetAsync(string sql_query_text, CancellationToken cancellationToken = default)
         {
-            if (string.IsNullOrEmpty(sql_query_text) || _factory.Connection == null || !_factory.Connection.IsValidConnection())
+            if (string.IsNullOrEmpty(sql_query_text) || _connection == null || !_connection.IsValidConnection())
                 return Array.Empty<MsSqlDataSet>();
 
             Stopwatch sw = new();
@@ -41,10 +43,10 @@ namespace data_access_layer.Microsoft.SQL
 
             try
             {
-                Log.Debug("ConnectionString {@ConnectionString} query {@Query}", _factory.Connection.GetConnection(), sql_query_text);
+                Log.Debug("ConnectionString {@ConnectionString} query {@Query}", _connection.GetConnection(), sql_query_text);
 
-                await _factory.OpenAsync(cancellationToken);
-                await using var command = _factory.CreateCommand();
+                await _connection.OpenAsync(cancellationToken);
+                await using var command = _connection.CreateCommand();
                 if (command == null) return Enumerable.Empty<MsSqlDataSet>();
 
                 command.CommandText = sql_query_text;
@@ -86,7 +88,7 @@ namespace data_access_layer.Microsoft.SQL
                 }
                 finally
                 {
-                    await _factory.CloseAsync();
+                    await _connection.CloseAsync();
                 }
 
                 return list;
@@ -98,7 +100,7 @@ namespace data_access_layer.Microsoft.SQL
             finally
             {
                 sw.Stop();
-                Log.Debug("{@SqlTotalExecutionTime} total query run time for {@ConnectionString}", sw.Elapsed, (_factory.Connection as MsSqlConnection)?.GetConnection().ConnectionString);
+                Log.Debug("{@SqlTotalExecutionTime} total query run time for {@ConnectionString}", sw.Elapsed, _connection.GetConnection().ConnectionString);
             }
 
             return Array.Empty<MsSqlDataSet>();
