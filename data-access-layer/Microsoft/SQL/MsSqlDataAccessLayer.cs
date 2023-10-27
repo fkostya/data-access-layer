@@ -1,36 +1,14 @@
-﻿using data_access_layer.Factory;
-using data_access_layer.Interface;
-using data_access_layer.Microsoft.SQL.Models;
-using Microsoft.Data.SqlClient;
+﻿using data_access_layer.Microsoft.SQL.Models;
 using Serilog;
 using System.Diagnostics;
 
 namespace data_access_layer.Microsoft.SQL
 {
-    public class MsSqlDataAccessLayer(MsSqlConnection connection/*, Func<MsSqlConnection, IDbConnectionWrapper<SqlConnectionStringBuilder>> factory*/)
+    public class MsSqlDataAccessLayer(MsSqlConnection connection)
     {
         private readonly MsSqlConnection _connection = connection;
-        //private readonly IDbConnectionWrapper<SqlConnectionStringBuilder> _factory = factory.Invoke(connection);
 
         #region ctor
-        //public MsSqlDataAccessLayer(MsSqlConnection connection)
-        //    : this(connection, new Func<string, MsSqlConnection>((connectionString) => new MsSqlConnection(connectionString, new DbConnectionFactory())))
-        //{
-        //}
-
-        //public MsSqlDataAccessLayer(MsSqlConnection connection)
-        //{
-        //    _connection = connection;
-        //    ////must be specified fields to establish connection to ms sql server
-        //    //if (msSqlAccess.TryGetValue("server", out string? server) && msSqlAccess.TryGetValue("database", out string? database))
-        //    //{
-        //    //    _connectionString = $@"Server={server};
-        //    //                                    Database={database}
-        //    //                                        {(msSqlAccess.TryGetValue("port", out string? port) ? $",{port}" : "")};
-        //    //                                    {(!string.IsNullOrEmpty(_userid) ? $"User Id ={_userid}" : "")};
-        //    //                                    {(!string.IsNullOrEmpty(_userpassword) ? $"Password ={_userpassword}" : "")};";
-        //    //}
-        //}
         #endregion
 
         public async Task<IEnumerable<MsSqlDataSet>> SelectDataAsDataSetAsync(string sql_query_text, CancellationToken cancellationToken = default)

@@ -98,7 +98,7 @@ namespace data_access_layer.Microsoft.SQL.Models
             return instance?.DisposeAsync() ?? ValueTask.CompletedTask;
         }
 
-        public bool IsValidConnection()
+        public virtual bool IsValidConnection()
         {
             if(builder == null || !isValidConnectionString) return false;
 
