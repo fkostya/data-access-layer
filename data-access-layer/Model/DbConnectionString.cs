@@ -9,7 +9,6 @@
         public string Database { get; init; }
         protected string? UserId { get; init; }
         protected string? Password { get; init; }
-        
 
         public abstract string ConnectionString { get; }
 
@@ -47,6 +46,7 @@
             }
         }
 
+        #region ctor
         public DbConnectionString(string name, string server, string database, string uid, string pwd, string sid)
         {
             Name = name;
@@ -56,5 +56,12 @@
             Password = pwd;
             SessionId = sid;
         }
+
+        public DbConnectionString(string name, string server, string database, string uid, string pwd, int? port, string sid)
+            : this(name, server, database, uid, pwd, sid)
+        {
+            Port = port;
+        }
+        #endregion
     }
 }

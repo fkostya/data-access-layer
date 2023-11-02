@@ -13,7 +13,7 @@ namespace data_access_layer.Microsoft.SQL
 
         public async Task<IEnumerable<MsSqlDataSet>> RunSqlQueryAsDataSetAsync(string sql_query_text, CancellationToken cancellationToken = default)
         {
-            if (string.IsNullOrEmpty(sql_query_text) || _connection == null || !_connection.IsValidConnection())
+            if (string.IsNullOrEmpty(sql_query_text) || _connection == null)
                 return Array.Empty<MsSqlDataSet>();
 
             Stopwatch sw = new();
@@ -21,7 +21,7 @@ namespace data_access_layer.Microsoft.SQL
 
             try
             {
-                Log.Debug("ConnectionString {@ConnectionString} query {@Query}", _connection.GetConnection(), sql_query_text);
+                Log.Debug("ConnectionString {@ConnectionString} query {@Query}", _connection.Connection, sql_query_text);
 
                 await _connection.OpenAsync(cancellationToken);
                 await using var command = _connection.CreateCommand();
@@ -78,7 +78,7 @@ namespace data_access_layer.Microsoft.SQL
             finally
             {
                 sw.Stop();
-                Log.Debug("{@SqlTotalExecutionTime} total query run time for {@ConnectionString}", sw.Elapsed, _connection.GetConnection().ConnectionString);
+                Log.Debug("{@SqlTotalExecutionTime} total query run time for {@ConnectionString}", sw.Elapsed, _connection.Connection);
             }
 
             return Array.Empty<MsSqlDataSet>();
