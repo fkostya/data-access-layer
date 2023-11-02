@@ -1,9 +1,11 @@
 ﻿using data_access_layer.Microsoft.SQL.Wrappers;
 using data_access_layer.Model;
 using Microsoft.Data.SqlClient;
+using System.Diagnostics.CodeAnalysis;
 
 namespace data_access_layer.Microsoft.SQL.Models
 {
+    [ExcludeFromCodeCoverage]
     public class MsSqlConnectionWrapper
     {
         public MsSqlConnectionString? Connection { get; init; }
