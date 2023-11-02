@@ -4,14 +4,14 @@ using System.Diagnostics;
 
 namespace data_access_layer.Microsoft.SQL
 {
-    public class MsSqlDataAccessLayer(MsSqlConnection connection)
+    public class MsSqlDataAccessLayer(MsSqlConnectionWrapper connection)
     {
-        private readonly MsSqlConnection _connection = connection;
+        private readonly MsSqlConnectionWrapper _connection = connection;
 
         #region ctor
         #endregion
 
-        public async Task<IEnumerable<MsSqlDataSet>> SelectDataAsDataSetAsync(string sql_query_text, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<MsSqlDataSet>> RunSqlQueryAsDataSetAsync(string sql_query_text, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrEmpty(sql_query_text) || _connection == null || !_connection.IsValidConnection())
                 return Array.Empty<MsSqlDataSet>();

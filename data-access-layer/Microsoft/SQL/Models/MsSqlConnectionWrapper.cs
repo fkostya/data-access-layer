@@ -1,31 +1,29 @@
-﻿using data_access_layer.Interface;
+﻿using data_access_layer.Factory;
+using data_access_layer.Interface;
+using data_access_layer.Microsoft.SQL.Wrappers;
 using Microsoft.Data.SqlClient;
-using System.Data.Common;
 
 namespace data_access_layer.Microsoft.SQL.Models
 {
-    public class MsSqlConnection : IConnection<SqlConnectionStringBuilder>
+    public class MsSqlConnectionWrapper : IConnectionWrapper<SqlConnectionStringBuilder>
     {
         private readonly SqlConnectionStringBuilder? builder;
-        private const int default_timeout_in_seconds = 180;
-        private readonly bool isValidConnectionString = true;
-        private readonly IDbFactory? factory;
-        private DbConnection? instance;
+        private const int default_timeout_in_seconds = 180; //overridable
+        protected IMsSqlDbFactory? factory { get; set; } = new MsSqlDbFactory();
+        private SqlConnection? instance;
 
         #region ctor
-        public MsSqlConnection(string _connectionString, IDbFactory factory)
+        public MsSqlConnectionWrapper(string _connectionString)
         {
             try
             {
                 builder = new SqlConnectionStringBuilder(_connectionString);
-                this.factory = factory;
             }
             catch {
-                isValidConnectionString = false;
             }
         }
 
-        public MsSqlConnection(string dbServer, string dbDatabase, string dbUserName, string dbPassword, IDbFactory factory)
+        public MsSqlConnectionWrapper(string dbServer, string dbDatabase, string dbUserName, string dbPassword)
         {
             try
             {
@@ -37,18 +35,29 @@ namespace data_access_layer.Microsoft.SQL.Models
                     Password = dbPassword,
                     ConnectTimeout = default_timeout_in_seconds
                 };
-                this.factory = factory;
             }
             catch
             {
-                isValidConnectionString = false;
             }
         }
+
         #endregion
+
+        private bool isValidConnectionString()
+        {
+            try
+            {
+                return builder?.ConnectionString != null;
+            }
+            catch
+            {
+            }
+            return false;
+        }
 
         public virtual Task OpenAsync(CancellationToken cancellationToken = default)
         {
-            if (isValidConnectionString && builder != null && factory != null)
+            if (isValidConnectionString() && builder != null && factory != null)
             {
                 try
                 {
@@ -73,7 +82,7 @@ namespace data_access_layer.Microsoft.SQL.Models
 
         public virtual MsSqlCommandWrapper CreateCommand()
         {
-            if (isValidConnectionString && builder != null && factory != null)
+            if (isValidConnectionString() && builder != null && factory != null)
             {
                 try
                 {
@@ -100,7 +109,7 @@ namespace data_access_layer.Microsoft.SQL.Models
 
         public virtual bool IsValidConnection()
         {
-            if(builder == null || !isValidConnectionString) return false;
+            if(builder == null || !isValidConnectionString()) return false;
 
             return !(string.IsNullOrEmpty(builder.InitialCatalog) ||
                     string.IsNullOrEmpty(builder.DataSource) ||

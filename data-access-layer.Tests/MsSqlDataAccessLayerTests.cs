@@ -11,7 +11,7 @@ namespace data_access_layer.Tests
 {
     public class MsSqlDataAccessLayerTests
     {
-        private readonly Mock<IDbFactory> factory = new();
+        private readonly Mock<IMsSqlDbFactory> factory = new();
 
         [Fact]
         public void NewInstanceWithConnectionNull_NotNull()
@@ -24,22 +24,22 @@ namespace data_access_layer.Tests
         [Fact]
         public void NewInstanceWithConnectionString_NotNull()
         {
-            Assert.NotNull(() => new MsSqlDataAccessLayer(new MsSqlConnection("connectionString", factory.Object)));
+            Assert.NotNull(() => new MsSqlDataAccessLayer(new MsSqlConnectionWrapper("connectionString")));
         }
 
         [Fact]
         public void NewInstanceWithConnection_NotNull()
         {
             Assert.NotNull(() =>
-                new MsSqlDataAccessLayer(new MsSqlConnection("test-local", "test-db", "test-userid", "test-pwd", factory.Object)));
+                new MsSqlDataAccessLayer(new MsSqlConnectionWrapper("test-local", "test-db", "test-userid", "test-pwd")));
         }
 
         [Fact]
         public async Task SelectDataAsDataSetAsync_EmptyQuery_EmptyDataSet()
         {
-            MsSqlDataAccessLayer dal = new(new MsSqlConnection("", factory.Object));
+            MsSqlDataAccessLayer dal = new(new MsSqlConnectionWrapper(""));
 
-            var ds = await dal.SelectDataAsDataSetAsync("");
+            var ds = await dal.RunSqlQueryAsDataSetAsync("");
 
             Assert.NotNull(ds);
             Assert.Empty(ds);
@@ -52,7 +52,7 @@ namespace data_access_layer.Tests
             MsSqlDataAccessLayer dal = new(null);
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
 
-            var ds = await dal.SelectDataAsDataSetAsync("");
+            var ds = await dal.RunSqlQueryAsDataSetAsync("");
 
             Assert.NotNull(ds);
             Assert.Empty(ds);
@@ -61,7 +61,7 @@ namespace data_access_layer.Tests
         [Fact]
         public async Task SelectDataAsDataSetAsync_InvalidConnection_EmptyDataSet()
         {
-            var connection = new Mock<MsSqlConnection>("", factory.Object);
+            var connection = new Mock<MsSqlConnectionWrapper>("", factory.Object);
 
             connection
                 .Setup(f => f.IsValidConnection())
@@ -69,7 +69,7 @@ namespace data_access_layer.Tests
 
             MsSqlDataAccessLayer dal = new(connection.Object);
 
-            var ds = await dal.SelectDataAsDataSetAsync("");
+            var ds = await dal.RunSqlQueryAsDataSetAsync("");
 
             Assert.NotNull(ds);
             Assert.Empty(ds);
@@ -78,44 +78,6 @@ namespace data_access_layer.Tests
         class DbColumnStub(string columnName) : DbColumn
         {
             public new string ColumnName { get; set; } = columnName;
-        }
-
-        class DbConnectionStub : DbConnection
-        {
-            public override string ConnectionString { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-
-            public override string Database => throw new NotImplementedException();
-
-            public override string DataSource => throw new NotImplementedException();
-
-            public override string ServerVersion => throw new NotImplementedException();
-
-            public override ConnectionState State => throw new NotImplementedException();
-
-            public override void ChangeDatabase(string databaseName)
-            {
-                throw new NotImplementedException();
-            }
-
-            public override void Close()
-            {
-                throw new NotImplementedException();
-            }
-
-            public override void Open()
-            {
-                throw new NotImplementedException();
-            }
-
-            protected override DbTransaction BeginDbTransaction(IsolationLevel isolationLevel)
-            {
-                throw new NotImplementedException();
-            }
-
-            protected override DbCommand CreateDbCommand()
-            {
-                throw new NotImplementedException();
-            }
         }
 
         [Fact]
