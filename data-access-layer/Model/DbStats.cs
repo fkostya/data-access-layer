@@ -1,5 +1,8 @@
-﻿namespace data_access_layer.Model
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace data_access_layer.Model
 {
+    [ExcludeFromCodeCoverage]
     public class DbStats
     {
         public string Database { get; set; } = "";
