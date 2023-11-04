@@ -8,11 +8,11 @@ namespace data_access_layer.Microsoft.SQL.Wrappers
     [ExcludeFromCodeCoverage]
     public class MsSqlDataReaderWrapper : IAsyncDisposable
     {
-        private readonly DbDataReader _reader;
+        private readonly DbDataReader? _reader;
         private bool empty = false;
 
         #region ctor
-        public MsSqlDataReaderWrapper(DbDataReader reader)
+        public MsSqlDataReaderWrapper(DbDataReader? reader)
         {
             _reader = reader;
         }
@@ -24,21 +24,25 @@ namespace data_access_layer.Microsoft.SQL.Wrappers
         }
         #endregion
 
-        public virtual bool HasRows => _reader.HasRows;
-        public virtual object this[string key] => _reader[key];
+        public virtual bool HasRows => _reader?.HasRows ?? false;
+        public virtual object this[string key] => _reader?[key] ?? new object();
 
         public ValueTask DisposeAsync()
         {
-            return _reader.DisposeAsync();
+            return _reader?.DisposeAsync() ?? ValueTask.CompletedTask;
         }
 
         public DataTable? GetSchemaTable()
         {
+            if (_reader == null) return new DataTable();
+
             return _reader.GetSchemaTable();
         }
 
         public Task<bool> ReadAsync(CancellationToken cancellationToken = default)
         {
+            if(_reader == null) return Task.FromResult(false);
+
             return _reader.ReadAsync(cancellationToken);
         }
 
@@ -46,8 +50,7 @@ namespace data_access_layer.Microsoft.SQL.Wrappers
         {
             try
             {
-                //return reader.GetOrdinal(key) >= 0 ? reader.GetValue(key) : @default;
-                return _reader.GetValue(key);
+                return _reader?.GetValue(key) ?? @default;
             }
             catch
             {
@@ -58,6 +61,7 @@ namespace data_access_layer.Microsoft.SQL.Wrappers
 
         public async Task<ReadOnlyCollection<DbColumn>> GetColumnSchemaAsync(CancellationToken cancellationToken = default)
         {
+            if (_reader == null) return await Task.FromResult(new ReadOnlyCollection<DbColumn>(new List<DbColumn>()));
             try
             {
                 return await _reader.GetColumnSchemaAsync();
@@ -71,12 +75,14 @@ namespace data_access_layer.Microsoft.SQL.Wrappers
 
         public Task<bool> NextResultAsync(CancellationToken cancellationToken = default)
         {
+            if (_reader == null) return Task.FromResult(false);
+
             return _reader.NextResultAsync(cancellationToken);
         }
 
         public void Close()
         {
-            _reader.Close();
+            _reader?.Close();
         }
     }
 }
