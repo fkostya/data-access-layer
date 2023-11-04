@@ -51,5 +51,15 @@ namespace data_access_layer.Tests.Microsoft.SQL.Wrappers
             
             await wrapper.Object.DisposeAsync();
         }
+
+        [Fact]
+        public void CommandText_SetCommand_GetEqualToSetS()
+        {
+            var mock = new DbCommandFake();
+            var wrapper = new MsSqlCommandWrapper(mock.Mock.Object);
+            wrapper.CommandText = "command test";
+
+            Assert.Equal("command test", wrapper.CommandText);
+        }
     }
 }

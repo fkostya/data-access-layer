@@ -6,29 +6,40 @@ using System.Diagnostics.CodeAnalysis;
 namespace data_access_layer.Microsoft.SQL.Wrappers
 {
     [ExcludeFromCodeCoverage]
-    public class MsSqlDataReaderWrapper(DbDataReader reader) : IAsyncDisposable
+    public class MsSqlDataReaderWrapper : IAsyncDisposable
     {
-        private readonly DbDataReader reader = reader;
+        private readonly DbDataReader _reader;
+        private bool empty = false;
 
         #region ctor
+        public MsSqlDataReaderWrapper(DbDataReader reader)
+        {
+            _reader = reader;
+        }
+
+        public MsSqlDataReaderWrapper()
+            : this(null)
+        {
+            empty = true;
+        }
         #endregion
 
-        public virtual bool HasRows => reader.HasRows;
-        public virtual object this[string key] => reader[key];
+        public virtual bool HasRows => _reader.HasRows;
+        public virtual object this[string key] => _reader[key];
 
         public ValueTask DisposeAsync()
         {
-            return reader.DisposeAsync();
+            return _reader.DisposeAsync();
         }
 
         public DataTable? GetSchemaTable()
         {
-            return reader.GetSchemaTable();
+            return _reader.GetSchemaTable();
         }
 
         public Task<bool> ReadAsync(CancellationToken cancellationToken = default)
         {
-            return reader.ReadAsync(cancellationToken);
+            return _reader.ReadAsync(cancellationToken);
         }
 
         public object? GetValueOrDefault(string key, object? @default = default)
@@ -36,11 +47,10 @@ namespace data_access_layer.Microsoft.SQL.Wrappers
             try
             {
                 //return reader.GetOrdinal(key) >= 0 ? reader.GetValue(key) : @default;
-                return reader.GetValue(key);
+                return _reader.GetValue(key);
             }
-            catch (Exception e)
+            catch
             {
-                int g = 0;
             }
 
             return @default;
@@ -50,11 +60,10 @@ namespace data_access_layer.Microsoft.SQL.Wrappers
         {
             try
             {
-                return await reader.GetColumnSchemaAsync();
+                return await _reader.GetColumnSchemaAsync();
             }
-            catch (Exception e)
+            catch
             {
-                int g = 0;
             }
 
             return new ReadOnlyCollection<DbColumn>(new List<DbColumn>());
@@ -62,12 +71,12 @@ namespace data_access_layer.Microsoft.SQL.Wrappers
 
         public Task<bool> NextResultAsync(CancellationToken cancellationToken = default)
         {
-            return reader.NextResultAsync(cancellationToken);
+            return _reader.NextResultAsync(cancellationToken);
         }
 
         public void Close()
         {
-            reader.Close();
+            _reader.Close();
         }
     }
 }
