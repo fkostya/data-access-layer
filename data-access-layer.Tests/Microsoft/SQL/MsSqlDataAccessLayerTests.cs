@@ -3,7 +3,7 @@ using data_access_layer.Microsoft.SQL.Models;
 using Moq;
 using System.Data.Common;
 
-namespace data_access_layer.Tests
+namespace data_access_layer.Tests.Microsoft.SQL
 {
     public class MsSqlDataAccessLayerTests
     {
