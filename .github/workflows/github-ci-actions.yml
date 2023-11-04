@@ -69,5 +69,5 @@ jobs:
            gist-id: 6139c93439673c361cd0aebd8462e298
            gist-auth-token: ${{ secrets.GIST_AUTH_TOKEN }}
 
-    - name: Print code coverage
-      run: echo "Code coverage percentage ${{steps.create_coverage_badge.outputs.percentage}}%"
+      - name: print code coverage
+        run: echo "Code coverage percentage ${{steps.create_coverage_badge.outputs.percentage}}%"
