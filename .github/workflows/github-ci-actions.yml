@@ -15,6 +15,10 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    env:
+      Solution_Name: data-access-layer.sln                               # Replace with your solution name, i.e. MyWpfApp.sln.
+      Test_Project_Path: data-access-layer.Tests\data-access-layer.Tests.csproj      # Replace with the path to your test project, i.e. MyWpfApp.Tests\MyWpfApp.Tests.csproj.
+    
     steps:
       - name: git checkout
         uses: actions/checkout@v4
