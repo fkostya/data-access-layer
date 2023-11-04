@@ -1,12 +1,11 @@
 ﻿using Microsoft.Data.SqlClient;
-using System.Diagnostics.CodeAnalysis;
+using System.Data.Common;
 
 namespace data_access_layer.Microsoft.SQL.Wrappers
 {
-    [ExcludeFromCodeCoverage]
-    public class MsSqlCommandWrapper(SqlCommand command) : IAsyncDisposable
+    public class MsSqlCommandWrapper(DbCommand command) : IAsyncDisposable
     {
-        private readonly SqlCommand _command = command;
+        private readonly DbCommand _command = command ?? new SqlCommand();
 
         #region ctor
         public MsSqlCommandWrapper()
@@ -23,7 +22,6 @@ namespace data_access_layer.Microsoft.SQL.Wrappers
 
         public virtual async Task<MsSqlDataReaderWrapper> ExecuteReaderAsync(CancellationToken cancellationToken = default)
         {
-            _command.CommandText = CommandText;
             return new MsSqlDataReaderWrapper(await _command.ExecuteReaderAsync(cancellationToken));
         }
 

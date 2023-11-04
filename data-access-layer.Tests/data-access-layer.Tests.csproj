@@ -34,4 +34,8 @@
     <ProjectReference Include="..\data-access-layer\data-access-layer.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Microsoft\SQL\Model\" />
+  </ItemGroup>
+
 </Project>

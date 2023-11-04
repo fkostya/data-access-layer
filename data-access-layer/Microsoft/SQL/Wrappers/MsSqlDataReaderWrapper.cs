@@ -1,5 +1,4 @@
-﻿using Microsoft.Data.SqlClient;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Data;
 using System.Data.Common;
 using System.Diagnostics.CodeAnalysis;
@@ -7,9 +6,9 @@ using System.Diagnostics.CodeAnalysis;
 namespace data_access_layer.Microsoft.SQL.Wrappers
 {
     [ExcludeFromCodeCoverage]
-    public class MsSqlDataReaderWrapper(SqlDataReader reader) : IAsyncDisposable
+    public class MsSqlDataReaderWrapper(DbDataReader reader) : IAsyncDisposable
     {
-        private readonly SqlDataReader reader = reader;
+        private readonly DbDataReader reader = reader;
 
         #region ctor
         #endregion
