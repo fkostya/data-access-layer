@@ -6,7 +6,7 @@ namespace data_access_layer.Microsoft.SQL.Wrappers
     public class MsSqlCommandWrapper(DbCommand command) : IAsyncDisposable
     {
         private readonly DbCommand _command = command ?? new SqlCommand();
-        private string _commandText { get; set; }
+        private string _commandText;
 
         #region ctor
         public MsSqlCommandWrapper()
@@ -17,7 +17,7 @@ namespace data_access_layer.Microsoft.SQL.Wrappers
 
         public virtual string CommandText
         {
-            set { _commandText= value; }
+            set { _commandText = value; }
             get { return _commandText; }
         }
 
