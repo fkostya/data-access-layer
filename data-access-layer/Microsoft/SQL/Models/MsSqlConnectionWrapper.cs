@@ -1,6 +1,7 @@
 ﻿using data_access_layer.Microsoft.SQL.Wrappers;
 using data_access_layer.Model;
 using Microsoft.Data.SqlClient;
+using System.Data.Common;
 using System.Diagnostics.CodeAnalysis;
 
 namespace data_access_layer.Microsoft.SQL.Models
@@ -9,15 +10,24 @@ namespace data_access_layer.Microsoft.SQL.Models
     public class MsSqlConnectionWrapper
     {
         public MsSqlConnectionString? Connection { get; init; }
-        private readonly SqlConnection? instance;
+        private readonly DbConnection? instance;
 
         #region ctor
+        public MsSqlConnectionWrapper(MsSqlConnectionString connectionString, Func<MsSqlConnectionString, DbConnection> factory)
+        {
+            Connection = connectionString;
+            if(Connection != null)
+            {
+                instance = factory.Invoke(connectionString);
+            }
+        }
+
         public MsSqlConnectionWrapper(MsSqlConnectionString? connectionString)
         {
             Connection = connectionString;
             if(Connection != null)
             {
-                instance = new(Connection.ConnectionString);
+                instance = new SqlConnection(Connection.ConnectionString);
             }
         }
         #endregion
