@@ -13,7 +13,7 @@ permissions:
 jobs:
   build:
 
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     env:
       Solution_Name: data-access-layer.sln                               # Replace with your solution name, i.e. MyWpfApp.sln.
@@ -39,7 +39,7 @@ jobs:
             dotnet publish -c Release -o ./published
 
       - name: test
-        run: dotnet test --no-restore --verbosity normal --collect:"XPlat Code Coverage" -p:CollectCoverage=true -p:CoverletOutput=TestResults/ -p:CoverletOutputFormat=opencover
+        run: dotnet test --no-restore --verbosity normal --collect:"XPlat Code Coverage" -p:CollectCoverage=true -p:CoverletOutput=TestResults/ -p:CoverletOutputFormat=opencover data-access-layer.Tests/
 
       - name: code coverage report
         uses: irongut/CodeCoverageSummary@v1.3.0
