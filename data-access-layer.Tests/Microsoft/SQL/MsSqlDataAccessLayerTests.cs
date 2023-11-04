@@ -1,6 +1,9 @@
 using data_access_layer.Microsoft.SQL;
 using data_access_layer.Microsoft.SQL.Models;
+using data_access_layer.Microsoft.SQL.Wrappers;
+using data_access_layer.Model;
 using Moq;
+using System.Collections.ObjectModel;
 using System.Data.Common;
 
 namespace data_access_layer.Tests.Microsoft.SQL
@@ -17,32 +20,28 @@ namespace data_access_layer.Tests.Microsoft.SQL
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
         }
 
-        //[Fact]
-        //public void NewInstanceWithConnectionString_NotNull()
-        //{
-        //    Assert.NotNull(() => new MsSqlDataAccessLayer(new MsSqlConnectionWrapper("connectionString")));
-        //}
-
-        //[Fact]
-        //public void NewInstanceWithConnection_NotNull()
-        //{
-        //    Assert.NotNull(() =>
-        //        new MsSqlDataAccessLayer(new MsSqlConnectionWrapper("test-local", "test-db", "test-userid", "test-pwd")));
-        //}
-
-        //[Fact]
-        //public async Task SelectDataAsDataSetAsync_EmptyQuery_EmptyDataSet()
-        //{
-        //    MsSqlDataAccessLayer dal = new(new MsSqlConnectionWrapper(""));
-
-        //    var ds = await dal.RunSqlQueryAsDataSetAsync("");
-
-        //    Assert.NotNull(ds);
-        //    Assert.Empty(ds);
-        //}
+        [Fact]
+        public void NewInstanceWithConnectionString_NotNull()
+        {
+            Assert.NotNull(() => new MsSqlDataAccessLayer(
+                new MsSqlConnectionWrapper(
+                    new MsSqlConnectionString("n", "s", "d", "s"))));
+        }
 
         [Fact]
-        public async Task SelectDataAsDataSetAsync_NoConnection_EmptyDataSet()
+        public async Task RunSqlQueryAsDataSetAsync_EmptyQuery_EmptyDataSet()
+        {
+            MsSqlDataAccessLayer layer = new(new MsSqlConnectionWrapper(
+                new MsSqlConnectionString("n", "s", "d", "s")));
+
+            var ds = await layer.RunSqlQueryAsDataSetAsync("");
+
+            Assert.NotNull(ds);
+            Assert.Empty(ds);
+        }
+
+        [Fact]
+        public async Task RunSqlQueryAsDataSetAsync_NoConnection_EmptyDataSet()
         {
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
             MsSqlDataAccessLayer dal = new(null);
@@ -55,71 +54,94 @@ namespace data_access_layer.Tests.Microsoft.SQL
         }
 
         [Fact]
-        public async Task SelectDataAsDataSetAsync_InvalidConnection_EmptyDataSet()
+        public async Task RunSqlQueryAsDataSetAsync_InvalidConnection_EmptyDataSet()
         {
-            //var connection = new Mock<MsSqlConnectionWrapper>("", factory.Object);
+            MsSqlDataAccessLayer layer = new(new MsSqlConnectionWrapper(
+                new MsSqlConnectionString("n", "", "", "s")));
 
-            ////connection
-            ////    .Setup(f => f.IsValidConnection())
-            ////    .Returns(false);
+            var ds = await layer.RunSqlQueryAsDataSetAsync("");
 
-            //MsSqlDataAccessLayer dal = new(connection.Object);
-
-            //var ds = await dal.RunSqlQueryAsDataSetAsync("");
-
-            //Assert.NotNull(ds);
-            //Assert.Empty(ds);
-        }
-
-        class DbColumnStub(string columnName) : DbColumn
-        {
-            public new string ColumnName { get; set; } = columnName;
+            Assert.NotNull(ds);
+            Assert.Empty(ds);
         }
 
         [Fact]
-        public async Task Full_ReadDataSet()
+        public async Task RunSqlQueryAsDataSetAsync_ReaderValueIsNull_CheckValueIsNull()
         {
-            //factory
-            //    .Setup(f => f.GetMsSqlDbConnection(new SqlConnectionStringBuilder()))
-            //    .Returns(new Mock<DbConnection>().Object);
+            var mock = new Mock<MsSqlConnectionWrapper>(new MsSqlConnectionString("n", "u", "p", "s"));
+            var db = new Mock<DbConnection>();
+            var command = new Mock<MsSqlCommandWrapper>();
+            var reader = new Mock<MsSqlDataReaderWrapper>();
+            var column = new Mock<DbColumn>();
 
-            //var connection = new MsSqlConnection("test-local", "test-db", "test-userid", "test-pwd", factory.Object);
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
+            column.Object.GetType().GetProperty("ColumnName").SetValue(column.Object, "column-0");
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
 
-            //var wrapper = new Mock<IDbConnectionWrapper<SqlConnectionStringBuilder>>();
-            ////wrapper
-            ////    .Setup(w => w.Connection)
-            ////    .Returns(connection);
+            var columns = new ReadOnlyCollection<DbColumn>(new List<DbColumn> {column.Object});
 
-            //var command = new Mock<MsSqlCommandWrapper>();
-            //var reader = new Mock<MsSqlDataReaderWrapper>();
+            reader.Setup(_ => _.GetColumnSchemaAsync(It.IsAny<CancellationToken>())).ReturnsAsync(columns);
+            reader.Setup(_ => _.HasRows).Returns(true);
+            reader.SetupSequence(_ => _.ReadAsync(It.IsAny<CancellationToken>())).ReturnsAsync(true).ReturnsAsync(false);
 
-            //reader
-            //    .SetupSequence(_ => _.HasRows)
-            //    .Returns(true)
-            //    .Returns(false);
+            command.Setup(_ => _.ExecuteReaderAsync(It.IsAny<CancellationToken>())).ReturnsAsync(reader.Object);
 
-            //reader
-            //    .Setup(_ => _.GetColumnSchemaAsync(It.IsAny<CancellationToken>()))
-            //    .ReturnsAsync(new ReadOnlyCollection<DbColumn>(new List<DbColumn>() { new DbColumnStub("column-0") }));
+            mock.Setup(_ => _.OpenAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+            mock.Setup(_ => _.CreateCommand()).Returns(command.Object);
 
-            //command
-            //    .Setup(_ => _.ExecuteReaderAsync(It.IsAny<CancellationToken>()))
-            //    .ReturnsAsync(reader.Object);
+            var func = new Func<MsSqlConnectionString, DbConnection>((c) => db.Object);
 
-            ////wrapper.Setup(_ => _.CreateCommand()).Returns(command.Object);
-            ////wrapper
-            ////    .Setup(_ => _.CreateCommand())
-            ////    .Returns(new Mock<SqlCommandWrapper>().Object);
+            MsSqlDataAccessLayer layer = new(mock.Object);
+            var ds = await layer.RunSqlQueryAsDataSetAsync("select test sql query");
 
-            ////var wrapper = new SqlConnectionWrapperStub(connection);
-            ////var factory = new Func<MsSqlConnection, IDbConnectionWrapper<SqlConnectionStringBuilder>>((s) => wrapper.Object);
+            Assert.NotNull(ds);
+            Assert.NotEmpty(ds);
+            Assert.Equal("column-0", ds.ElementAt(0).Columns["column-0"].ColumnName);
 
-            //var builder = new MsSqlDataAccessLayer(connection);
+            Assert.NotEmpty(ds.ElementAt(0)[0]);
 
-            //var ds = await builder.SelectDataAsDataSetAsync("select sql query");
-            ////Assert.NotNull(ds);
-            ////Assert.NotEmpty(ds);
-            ////Assert.True(ds.ElementAtOrDefault(0)?.Columns?.ContainsKey("column-0"));
+            Assert.Null(ds.ElementAt(0)[0]["column-0"]);
+            mock.Verify(_ => _.CloseAsync(), Times.Once);
+        }
+
+        [Fact]
+        public async Task RunSqlQueryAsDataSetAsync_ReaderValueNotNull_CheckValueIsNotNull()
+        {
+            var mock = new Mock<MsSqlConnectionWrapper>(new MsSqlConnectionString("n", "u", "p", "s"));
+            var db = new Mock<DbConnection>();
+            var command = new Mock<MsSqlCommandWrapper>();
+            var reader = new Mock<MsSqlDataReaderWrapper>();
+            var column = new Mock<DbColumn>();
+
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
+            column.Object.GetType().GetProperty("ColumnName").SetValue(column.Object, "column-0");
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
+
+            var columns = new ReadOnlyCollection<DbColumn>(new List<DbColumn> { column.Object });
+
+            reader.Setup(_ => _.GetColumnSchemaAsync(It.IsAny<CancellationToken>())).ReturnsAsync(columns);
+            reader.Setup(_ => _.HasRows).Returns(true);
+            reader.SetupSequence(_ => _.ReadAsync(It.IsAny<CancellationToken>())).ReturnsAsync(true).ReturnsAsync(false);
+            reader.Setup(_ => _[It.IsAny<string>()]).Returns(new object());
+
+            command.Setup(_ => _.ExecuteReaderAsync(It.IsAny<CancellationToken>())).ReturnsAsync(reader.Object);
+
+            mock.Setup(_ => _.OpenAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+            mock.Setup(_ => _.CreateCommand()).Returns(command.Object);
+
+            var func = new Func<MsSqlConnectionString, DbConnection>((c) => db.Object);
+
+            MsSqlDataAccessLayer layer = new(mock.Object);
+            var ds = await layer.RunSqlQueryAsDataSetAsync("select test sql query");
+
+            Assert.NotNull(ds);
+            Assert.NotEmpty(ds);
+            Assert.Equal("column-0", ds.ElementAt(0).Columns["column-0"].ColumnName);
+
+            Assert.NotEmpty(ds.ElementAt(0)[0]);
+
+            Assert.NotNull(ds.ElementAt(0)[0]["column-0"]);
+            mock.Verify(_ => _.CloseAsync(), Times.Once);
         }
     }
 }

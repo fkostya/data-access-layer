@@ -35,7 +35,7 @@ namespace data_access_layer.Microsoft.SQL.Wrappers
             return _reader.GetSchemaTable();
         }
 
-        public Task<bool> ReadAsync(CancellationToken cancellationToken = default)
+        public virtual Task<bool> ReadAsync(CancellationToken cancellationToken = default)
         {
             if(_reader == null) return Task.FromResult(false);
 
@@ -55,7 +55,7 @@ namespace data_access_layer.Microsoft.SQL.Wrappers
             return @default;
         }
 
-        public async Task<ReadOnlyCollection<DbColumn>> GetColumnSchemaAsync(CancellationToken cancellationToken = default)
+        public virtual async Task<ReadOnlyCollection<DbColumn>> GetColumnSchemaAsync(CancellationToken cancellationToken = default)
         {
             if (_reader == null) return await Task.FromResult(new ReadOnlyCollection<DbColumn>(new List<DbColumn>()));
             try
