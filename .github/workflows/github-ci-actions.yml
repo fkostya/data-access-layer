@@ -13,7 +13,7 @@ permissions:
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     env:
       Solution_Name: data-access-layer.sln                               # Replace with your solution name, i.e. MyWpfApp.sln.
