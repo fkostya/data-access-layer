@@ -57,7 +57,10 @@ jobs:
            recreate: true
            path: code-coverage-results.md
 
-     # Execute code coverage for unit tests results in the solution
+      - name: test
+        run: dotnet test --no-restore --verbosity normal --collect:"XPlat Code Coverage" -p:CollectCoverage=true -p:CoverletOutput=TestResults/ -p:CoverletOutputFormat=opencover data-access-layer.Tests
+
+      # Execute code coverage for unit tests results in the solution
       - name: code coverage badge
         uses: simon-k/dotnet-code-coverage-badge@v1.0.0
         id: create_coverage_badge
