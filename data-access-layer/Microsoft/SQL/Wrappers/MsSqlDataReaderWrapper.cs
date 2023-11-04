@@ -5,11 +5,9 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace data_access_layer.Microsoft.SQL.Wrappers
 {
-    [ExcludeFromCodeCoverage]
     public class MsSqlDataReaderWrapper : IAsyncDisposable
     {
         private readonly DbDataReader? _reader;
-        private bool empty = false;
 
         #region ctor
         public MsSqlDataReaderWrapper(DbDataReader? reader)
@@ -20,7 +18,6 @@ namespace data_access_layer.Microsoft.SQL.Wrappers
         public MsSqlDataReaderWrapper()
             : this(null)
         {
-            empty = true;
         }
         #endregion
 
