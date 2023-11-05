@@ -16,8 +16,8 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      Solution_Name: data-access-layer.sln                               # Replace with your solution name, i.e. MyWpfApp.sln.
-      Test_Project_Path: data-access-layer.Tests\data-access-layer.Tests.csproj      # Replace with the path to your test project, i.e. MyWpfApp.Tests\MyWpfApp.Tests.csproj.
+      Solution_Name: data-access-layer.sln
+      Test_Project_Path: data-access-layer.Tests\data-access-layer.Tests.csproj
     
     steps:
       - name: git checkout
@@ -68,7 +68,7 @@ jobs:
         with:
            label: code coverage
            color: green
-           path: data-access-layer.Tests\TestResults\coverage.opencover.xml
+           path: data-access-layer.Tests\TestResults\**\coverage.opencover.xml
            gist-filename: code-coverage.json
            gist-id: 6139c93439673c361cd0aebd8462e298
            gist-auth-token: ${{ secrets.GIST_AUTH_TOKEN }}
