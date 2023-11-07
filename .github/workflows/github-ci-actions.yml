@@ -17,7 +17,7 @@ jobs:
 
     env:
       Solution_Name: data-access-layer.sln
-      Test_Project_Path: data-access-layer.Tests\data-access-layer.Tests.csproj
+      Test_Project_Path: data-access-layer.Tests/data-access-layer.Tests.csproj
     
     steps:
       - name: git checkout
