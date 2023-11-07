@@ -39,13 +39,12 @@ jobs:
             dotnet publish -c Release -o ./published
 
       - name: test
-        run: dotnet test --no-restore --verbosity normal -p:CollectCoverage=true -p:CoverletOutput=TestResults/ -p:CoverletOutputFormat=opencover
-        # dotnet test --no-restore --verbosity normal --collect:"XPlat Code Coverage" -p:CollectCoverage=true -p:CoverletOutput=TestResults/ -p:CoverletOutputFormat=opencover data-access-layer.Tests/
+        run: dotnet test --no-restore --verbosity normal --collect:"XPlat Code Coverage" -p:CollectCoverage=true -p:CoverletOutput=TestResults/ -p:CoverletOutputFormat=opencover data-access-layer.Tests/
 
-      - name: code coverage report
+      - name: generate code coverage report
         uses: irongut/CodeCoverageSummary@v1.3.0
         with:
-          filename: data-access-layer.Tests/TestResults/coverage.cobertura.xml
+          filename: data-access-layer.Tests/TestResults/**/coverage.cobertura.xml
           badge: true
           fail_below_min: true
           format: markdown
@@ -61,6 +60,10 @@ jobs:
         with:
            recreate: true
            path: code-coverage-results.md
+
+      - name: test2
+        run: dotnet test --no-restore --verbosity normal -p:CollectCoverage=true -p:CoverletOutput=TestResults/ -p:CoverletOutputFormat=opencover
+        # dotnet test --no-restore --verbosity normal --collect:"XPlat Code Coverage" -p:CollectCoverage=true -p:CoverletOutput=TestResults/ -p:CoverletOutputFormat=opencover data-access-layer.Tests/
 
      # Execute code coverage for unit tests results in the solution
       - name: code coverage badge
