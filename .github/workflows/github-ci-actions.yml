@@ -17,7 +17,7 @@ jobs:
 
     env:
       Solution_Name: data-access-layer.sln
-      Test_Project_Path: data-access-layer.Tests\data-access-layer.Tests.csproj
+      Test_Project_Path: data-access-layer.Tests/data-access-layer.Tests.csproj
     
     steps:
       - name: git checkout
@@ -41,7 +41,7 @@ jobs:
       - name: test
         run: dotnet test --no-restore --verbosity normal --collect:"XPlat Code Coverage" -p:CollectCoverage=true -p:CoverletOutput=TestResults/ -p:CoverletOutputFormat=opencover data-access-layer.Tests/
 
-      - name: code coverage report
+      - name: generate code coverage report
         uses: irongut/CodeCoverageSummary@v1.3.0
         with:
           filename: data-access-layer.Tests/TestResults/**/coverage.cobertura.xml
@@ -61,6 +61,10 @@ jobs:
            recreate: true
            path: code-coverage-results.md
 
+      - name: test2
+        run: dotnet test --no-restore --no-build --verbosity normal -p:CollectCoverage=true -p:CoverletOutput=TestResults/ -p:CoverletOutputFormat=opencover
+        # dotnet test --no-restore --verbosity normal --collect:"XPlat Code Coverage" -p:CollectCoverage=true -p:CoverletOutput=TestResults/ -p:CoverletOutputFormat=opencover data-access-layer.Tests/
+
      # Execute code coverage for unit tests results in the solution
       - name: code coverage badge
         uses: simon-k/dotnet-code-coverage-badge@v1.0.0
@@ -68,7 +72,7 @@ jobs:
         with:
            label: code coverage
            color: green
-           path: data-access-layer.Tests\TestResults\**\coverage.opencover.xml
+           path: data-access-layer.Tests/TestResults/coverage.opencover.xml
            gist-filename: code-coverage.json
            gist-id: 6139c93439673c361cd0aebd8462e298
            gist-auth-token: ${{ secrets.GIST_AUTH_TOKEN }}
