@@ -69,7 +69,7 @@ jobs:
            color: green
            path: data-access-layer.Tests\TestResults\coverage.opencover.xml
            gist-filename: code-coverage.json
-           gist-id: 6139c93439673c361cd0aebd8462e298
+           gist-id: fef0e90db94bb13c87cafbdde294dd6b
            gist-auth-token: ${{ secrets.GIST_AUTH_TOKEN }}
 
       - name: print code coverage
