@@ -1,3 +1,5 @@
 # data-access-layer
 
-[![cov](https://img.shields.io/badge/Code%20Coverage-91%25-success?style=flat)](https://img.shields.io/badge/Code%20Coverage-91%25-success?style=flat)
+**ver1.0**\
+\
+![badge](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/fkostya/48e686c342c7317c22ad034a57c17f69/raw/code-coverage-dal.json)
