@@ -72,8 +72,8 @@ jobs:
            label: code coverage
            color: green
            path: data-access-layer.Tests/TestResults/coverage.opencover.xml
-           gist-filename: dal-code-coverage.json
-           gist-id: 65a3185d556c353dcf280753d00a4f8f
+           gist-filename: code-coverage-dal.json
+           gist-id: 48e686c342c7317c22ad034a57c17f69
            gist-auth-token: ${{ secrets.GIST_AUTH_TOKEN }}
 
       - name: Print code coverage
