@@ -9,16 +9,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Microsoft\SQL\Models\**" />
+    <EmbeddedResource Remove="Microsoft\SQL\Models\**" />
+    <None Remove="Microsoft\SQL\Models\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.1" />
     <PackageReference Include="MinVer" Version="4.3.0">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Serilog" Version="3.0.1" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Microsoft\SQL\Models\" />
   </ItemGroup>
 
 </Project>

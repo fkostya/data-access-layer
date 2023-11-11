@@ -60,9 +60,9 @@ namespace data_access_layer.Microsoft.SQL
                         list.Add(dataset);
                     } while (await reader.NextResultAsync(cancellationToken));
                 }
-                catch
+                catch(Exception ex)
                 {
-                    throw;
+                    Log.Error(ex.Message, ex);
                 }
                 finally
                 {
