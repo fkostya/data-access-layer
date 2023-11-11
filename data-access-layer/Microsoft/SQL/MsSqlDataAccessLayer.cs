@@ -1,4 +1,4 @@
-﻿using data_access_layer.Microsoft.SQL.Models;
+﻿using data_access_layer.Microsoft.SQL.Wrappers;
 using Serilog;
 using System.Diagnostics;
 

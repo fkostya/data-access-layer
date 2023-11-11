@@ -1,31 +1,28 @@
-﻿using data_access_layer.Microsoft.SQL.Wrappers;
-using data_access_layer.Model;
+﻿using data_access_layer.Model;
 using Microsoft.Data.SqlClient;
 using System.Data.Common;
-using System.Diagnostics.CodeAnalysis;
 
-namespace data_access_layer.Microsoft.SQL.Models
+namespace data_access_layer.Microsoft.SQL.Wrappers
 {
-    [ExcludeFromCodeCoverage]
     public class MsSqlConnectionWrapper
     {
         public MsSqlConnectionString? Connection { get; init; }
         private readonly DbConnection? instance;
 
         #region ctor
-        public MsSqlConnectionWrapper(MsSqlConnectionString connectionString, Func<MsSqlConnectionString, DbConnection> factory)
+        public MsSqlConnectionWrapper(MsSqlConnectionString connection, Func<MsSqlConnectionString, DbConnection> factory)
         {
-            Connection = connectionString;
-            if(Connection != null)
+            Connection = connection;
+            if (Connection != null)
             {
-                instance = factory.Invoke(connectionString);
+                instance = factory.Invoke(connection);
             }
         }
 
         public MsSqlConnectionWrapper(MsSqlConnectionString? connectionString)
         {
             Connection = connectionString;
-            if(Connection != null)
+            if (Connection != null)
             {
                 instance = new SqlConnection(Connection.ConnectionString);
             }
@@ -39,7 +36,7 @@ namespace data_access_layer.Microsoft.SQL.Models
                 return instance?.OpenAsync(cancellationToken) ?? Task.CompletedTask;
             }
             catch { }
-            
+
             return Task.CompletedTask;
         }
 
@@ -47,7 +44,7 @@ namespace data_access_layer.Microsoft.SQL.Models
         {
             try
             {
-                if(instance != null)
+                if (instance != null)
                 {
                     return new MsSqlCommandWrapper(instance.CreateCommand());
                 }
@@ -61,7 +58,7 @@ namespace data_access_layer.Microsoft.SQL.Models
             return instance?.CloseAsync() ?? Task.CompletedTask;
         }
 
-        public ValueTask DisposeAsync()
+        public virtual ValueTask DisposeAsync()
         {
             return instance?.DisposeAsync() ?? ValueTask.CompletedTask;
         }
