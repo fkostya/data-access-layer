@@ -6,7 +6,6 @@ namespace data_access_layer.Microsoft.SQL.Wrappers
     public class MsSqlCommandWrapper(DbCommand command) : IAsyncDisposable
     {
         private readonly DbCommand _command = command ?? new SqlCommand();
-        private string _commandText;
 
         #region ctor
         public MsSqlCommandWrapper()
@@ -17,18 +16,13 @@ namespace data_access_layer.Microsoft.SQL.Wrappers
 
         public virtual string CommandText
         {
-            set { _commandText = value; }
-            get { return _commandText; }
+            set { _command.CommandText = value; }
+            get { return _command.CommandText; }
         }
 
         public virtual async Task<MsSqlDataReaderWrapper> ExecuteReaderAsync(CancellationToken cancellationToken = default)
         {
-            if(_command != null)
-            {
-                _command.CommandText = _commandText;
-                return new MsSqlDataReaderWrapper(await _command.ExecuteReaderAsync(cancellationToken));
-            }
-            return await Task.FromResult(new MsSqlDataReaderWrapper());
+            return new MsSqlDataReaderWrapper(await _command.ExecuteReaderAsync(cancellationToken));
         }
 
         public ValueTask DisposeAsync()
