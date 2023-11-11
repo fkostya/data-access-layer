@@ -12,6 +12,11 @@ namespace data_access_layer.Tests.Microsoft.SQL.Wrappers
             public Mock<DbCommand> Mock { get; init; } = new Mock<DbCommand>();
             private Mock<DbDataReader> readerMock = new Mock<DbDataReader>();
 
+            public DbCommandFake()
+            {
+                Mock.Setup(_ => _.CommandText).Returns("test command");
+            }
+
             public Task<DbDataReader> ExecuteReaderAsync()
             {
                 return Task.FromResult(readerMock.Object);
@@ -53,13 +58,14 @@ namespace data_access_layer.Tests.Microsoft.SQL.Wrappers
         }
 
         [Fact]
-        public void CommandText_SetCommand_GetEqualToSetS()
+        public void CommandText_SetCommand_GetEqualToSet()
         {
             var mock = new DbCommandFake();
             var wrapper = new MsSqlCommandWrapper(mock.Mock.Object);
-            wrapper.CommandText = "command test";
+            wrapper.CommandText = "test command";
 
-            Assert.Equal("command test", wrapper.CommandText);
+
+            Assert.Equal("test command", wrapper.CommandText);
         }
     }
 }
