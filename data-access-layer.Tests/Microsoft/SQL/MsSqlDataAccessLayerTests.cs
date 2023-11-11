@@ -1,5 +1,4 @@
 using data_access_layer.Microsoft.SQL;
-using data_access_layer.Microsoft.SQL.Models;
 using data_access_layer.Microsoft.SQL.Wrappers;
 using data_access_layer.Model;
 using Moq;

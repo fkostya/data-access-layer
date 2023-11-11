@@ -11,8 +11,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Microsoft\SQL\Model\**" />
     <Compile Remove="TestResults\**" />
+    <EmbeddedResource Remove="Microsoft\SQL\Model\**" />
     <EmbeddedResource Remove="TestResults\**" />
+    <None Remove="Microsoft\SQL\Model\**" />
     <None Remove="TestResults\**" />
   </ItemGroup>
 
@@ -36,10 +39,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\data-access-layer\data-access-layer.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Microsoft\SQL\Model\" />
   </ItemGroup>
 
 </Project>
