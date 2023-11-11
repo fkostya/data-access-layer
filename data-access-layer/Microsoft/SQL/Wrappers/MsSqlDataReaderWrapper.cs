@@ -69,7 +69,7 @@ namespace data_access_layer.Microsoft.SQL.Wrappers
             return new ReadOnlyCollection<DbColumn>(new List<DbColumn>());
         }
 
-        public Task<bool> NextResultAsync(CancellationToken cancellationToken = default)
+        public virtual Task<bool> NextResultAsync(CancellationToken cancellationToken = default)
         {
             if (_reader == null) return Task.FromResult(false);
 
