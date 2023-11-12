@@ -49,7 +49,7 @@ jobs:
         run: dotnet nuget add source --username fkostya --password ${{ secrets.NUGET_PACKAGE }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/fkostya/index.json"
       
       - name: publish to GitHub packages 
-        run: dotnet nuget push data-access-layer/bin/Release/*.nupkg --api-key ${{ secrets.NUGET_PACKAGE }}  --source "github"
+        run: dotnet nuget push data-access-layer/bin/Release/*.nupkg --api-key ${{ secrets.NUGET_PACKAGE }}  --source "github" --skip-duplicate
         # end nuget package
 
       - name: generate code coverage report
