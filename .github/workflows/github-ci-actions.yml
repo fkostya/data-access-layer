@@ -9,7 +9,7 @@ on:
 
 permissions:
   pull-requests: write
-  
+
 jobs:
   build:
 
@@ -18,13 +18,13 @@ jobs:
     env:
       Solution_Name: data-access-layer.sln
       Test_Project_Path: data-access-layer.Tests/data-access-layer.Tests.csproj
-    
+
     steps:
       - name: git checkout
         uses: actions/checkout@v4
         with:
             fetch-depth: 0
-      
+
       - name: install dotnet '8.0.100-rc.2.23502.2'
         uses: actions/setup-dotnet@v3
         with:
@@ -40,6 +40,17 @@ jobs:
 
       - name: test
         run: dotnet test --no-restore --verbosity normal --collect:"XPlat Code Coverage" -p:CollectCoverage=true -p:CoverletOutput=TestResults/ -p:CoverletOutputFormat=opencover data-access-layer.Tests/
+
+      # nuget package https://samlearnsazure.blog/2021/07/27/publishing-a-nuget-package-to-github-packages/
+      - name: pack package
+        run: dotnet pack data-access-layer/data-access-layer.csproj -c Release
+
+      - name: prep packages
+        run: dotnet nuget add source --username fkostya --password ${{ secrets.NUGET_PACKAGE }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/fkostya/index.json"
+      
+      - name: publish to GitHub packages 
+        run: dotnet nuget push data-access-layer/bin/Release/*.nupkg --api-key ${{ secrets.NUGET_PACKAGE }}  --source "github"
+        # end nuget package
 
       - name: generate code coverage report
         uses: irongut/CodeCoverageSummary@v1.3.0
