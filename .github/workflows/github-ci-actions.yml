@@ -58,7 +58,7 @@ jobs:
 
       - name: print OS
         run:
-          echo runner.os
+          echo ${{runner.os}}
 
       - name: generate code coverage report
         uses: irongut/CodeCoverageSummary@v1.3.0
