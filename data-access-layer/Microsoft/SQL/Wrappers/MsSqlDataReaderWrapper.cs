@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using Serilog;
+using System.Collections.ObjectModel;
 using System.Data;
 using System.Data.Common;
 
@@ -48,8 +49,9 @@ namespace data_access_layer.Microsoft.SQL.Wrappers
             {
                 return _reader?.GetValue(key) ?? @default;
             }
-            catch
+            catch(Exception ex)
             {
+                Log.Error(ex, ex.Message);
             }
 
             return @default;
@@ -62,8 +64,9 @@ namespace data_access_layer.Microsoft.SQL.Wrappers
             {
                 return await _reader.GetColumnSchemaAsync();
             }
-            catch
+            catch(Exception e)
             {
+                Log.Error(e, e.Message);
             }
 
             return new ReadOnlyCollection<DbColumn>(new List<DbColumn>());
