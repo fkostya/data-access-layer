@@ -1,5 +1,6 @@
 ﻿using data_access_layer.Model;
 using Microsoft.Data.SqlClient;
+using Serilog;
 using System.Data.Common;
 
 namespace data_access_layer.Microsoft.SQL.Wrappers
@@ -35,7 +36,9 @@ namespace data_access_layer.Microsoft.SQL.Wrappers
             {
                 return instance?.OpenAsync(cancellationToken) ?? Task.CompletedTask;
             }
-            catch { }
+            catch(Exception e) {
+                Log.Error(e, e.Message);
+            }
 
             return Task.CompletedTask;
         }
@@ -49,7 +52,9 @@ namespace data_access_layer.Microsoft.SQL.Wrappers
                     return new MsSqlCommandWrapper(instance.CreateCommand());
                 }
             }
-            catch { }
+            catch(Exception e){
+                Log.Error(e, e.Message);
+            }
             return new MsSqlCommandWrapper();
         }
 
