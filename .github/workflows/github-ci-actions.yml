@@ -20,7 +20,7 @@ jobs:
 
     env:
       Solution_Name: data-access-layer.sln
-      Test_Project_Path: data-access-layer.Tests/data-access-layer.Tests.csproj
+      Test_Project_Path: fkostya.data-access-layer.Tests/data-access-layer.Tests.csproj
 
     steps:
       - name: running on OS
@@ -46,25 +46,25 @@ jobs:
             dotnet publish -c Release -o ./published
 
       - name: test
-        run: dotnet test --no-restore --verbosity normal --collect:"XPlat Code Coverage" -p:CollectCoverage=true -p:CoverletOutput=TestResults/ -p:CoverletOutputFormat=opencover data-access-layer.Tests/
+        run: dotnet test --no-restore --verbosity normal --collect:"XPlat Code Coverage" -p:CollectCoverage=true -p:CoverletOutput=TestResults/ -p:CoverletOutputFormat=opencover fkostya.data-access-layer.Tests/
 
       # nuget package https://samlearnsazure.blog/2021/07/27/publishing-a-nuget-package-to-github-packages/
       - name: pack package
-        run: dotnet pack data-access-layer/data-access-layer.csproj -c Release
+        run: dotnet pack fkostya.data-access-layer/data-access-layer.csproj -c Release
 
       - name: prep packages
         run: dotnet nuget add source --username fkostya --password ${{ secrets.NUGET_PACKAGE }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/fkostya/index.json"
 
       - name: publish to GitHub packages
         if: runner.os == 'Linux'
-        run: dotnet nuget push data-access-layer/bin/Release/*.nupkg --api-key ${{ secrets.NUGET_PACKAGE }}  --source "github" --skip-duplicate
+        run: dotnet nuget push fkostya.data-access-layer/bin/Release/*.nupkg --api-key ${{ secrets.NUGET_PACKAGE }}  --source "github" --skip-duplicate
         # end nuget package
 
       - name: generate code coverage report
         uses: irongut/CodeCoverageSummary@v1.3.0
         if: runner.os == 'Linux'
         with:
-          filename: data-access-layer.Tests/TestResults/**/coverage.cobertura.xml
+          filename: fkostya.data-access-layer.Tests/TestResults/**/coverage.cobertura.xml
           badge: true
           fail_below_min: true
           format: markdown
@@ -91,7 +91,7 @@ jobs:
         with:
            label: code coverage
            color: green
-           path: data-access-layer.Tests/TestResults/coverage.opencover.xml
+           path: fkostya.data-access-layer.Tests/TestResults/coverage.opencover.xml
            gist-filename: code-coverage-dal.json
            gist-id: 48e686c342c7317c22ad034a57c17f69
            gist-auth-token: ${{ secrets.GIST_AUTH_TOKEN }}
