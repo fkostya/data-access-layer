@@ -38,6 +38,58 @@ namespace data_access_layer.Tests.Microsoft.SQL
         }
 
         [Fact]
+        public async Task RunSqlQueryAsDataSetAsync_CreateCommandNull_ReturnsEmptyDataSet()
+        {
+            var connection = new Mock<MsSqlConnectionWrapper>(new MsSqlConnectionString("n", "s", "d", "s"));
+#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
+            connection.Setup(_ => _.CreateCommand()).Returns<MsSqlCommandWrapper>(null);
+#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
+            MsSqlDataAccessLayer layer = new(connection.Object);
+
+            var ds = await layer.RunSqlQueryAsDataSetAsync("select");
+
+            Assert.NotNull(ds);
+            Assert.Empty(ds);
+        }
+
+        [Fact]
+        public async Task RunSqlQueryAsDataSetAsync_ExecuteReaderAsyncNull_ReturnsEmptyDataSet()
+        {
+            var connection = new Mock<MsSqlConnectionWrapper>(new MsSqlConnectionString("n", "s", "d", "s"));
+            var command = new Mock<MsSqlCommandWrapper>();
+#pragma warning disable CS8620 // Argument cannot be used for parameter due to differences in the nullability of reference types.
+            command.Setup(_ => _.ExecuteReaderAsync(It.IsAny<CancellationToken>())).ReturnsAsync(null as MsSqlDataReaderWrapper);
+#pragma warning restore CS8620 // Argument cannot be used for parameter due to differences in the nullability of reference types.
+            connection.Setup(_ => _.CreateCommand()).Returns(command.Object);
+
+            MsSqlDataAccessLayer layer = new(connection.Object);
+
+            var ds = await layer.RunSqlQueryAsDataSetAsync("select");
+
+            Assert.NotNull(ds);
+            Assert.Empty(ds);
+        }
+
+        [Fact]
+        public async Task RunSqlQueryAsDataSetAsync_HasRowsFalse_ReturnsEmptyDataSet()
+        {
+            var connection = new Mock<MsSqlConnectionWrapper>(new MsSqlConnectionString("n", "s", "d", "s"));
+            var reader = new Mock<MsSqlDataReaderWrapper>();
+            var command = new Mock<MsSqlCommandWrapper>();
+
+            reader.Setup(_ => _.HasRows).Returns(false);
+            command.Setup(_ => _.ExecuteReaderAsync(It.IsAny<CancellationToken>())).ReturnsAsync(reader.Object);
+            connection.Setup(_ => _.CreateCommand()).Returns(command.Object);
+
+            MsSqlDataAccessLayer layer = new(connection.Object);
+
+            var ds = await layer.RunSqlQueryAsDataSetAsync("select");
+
+            Assert.NotNull(ds);
+            Assert.Empty(ds);
+        }
+
+        [Fact]
         public async Task RunSqlQueryAsDataSetAsync_NoConnection_ReturnsEmptyDataSet()
         {
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
@@ -144,12 +196,10 @@ namespace data_access_layer.Tests.Microsoft.SQL
         [Fact]
         public async Task RunSqlQueryAsDataSetAsync_OpenAsyncThrowException_ReturnsEmptyDataSet()
         {
-            var mock = new Mock<MsSqlConnectionWrapper>(new MsSqlConnectionString("n", "u", "p", "s"));
-            var db = new Mock<DbConnection>();
+            var func = new Func<MsSqlConnectionString, DbConnection>((c) => new Mock<DbConnection>().Object);
+            var mock = new Mock<MsSqlConnectionWrapper>(new MsSqlConnectionString("n", "u", "p", "s"), func);
 
             mock.Setup(_ => _.OpenAsync(It.IsAny<CancellationToken>())).Throws(new Exception());
-
-            var func = new Func<MsSqlConnectionString, DbConnection>((c) => db.Object);
 
             MsSqlDataAccessLayer layer = new(mock.Object);
             var ds = await layer.RunSqlQueryAsDataSetAsync("select test sql query");

@@ -97,7 +97,9 @@ namespace data_access_layer.Tests.Microsoft.SQL.Wrappers
 
         class DbConnectionFakeException : DbConnection
         {
+#pragma warning disable CS8765 // Nullability of type of parameter doesn't match overridden member (possibly because of nullability attributes).
             public override string ConnectionString { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+#pragma warning restore CS8765 // Nullability of type of parameter doesn't match overridden member (possibly because of nullability attributes).
 
             public override string Database => throw new NotImplementedException();
 
