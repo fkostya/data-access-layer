@@ -35,7 +35,7 @@ jobs:
       - name: install dotnet '8.0.100'
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: '8.0.100-rc.2.23502.2'
+          dotnet-version: '8.0.100'
 
       - name: restore dependencies
         run: dotnet restore
