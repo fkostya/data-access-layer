@@ -20,7 +20,7 @@ jobs:
 
     env:
       Solution_Name: data-access-layer.sln
-      Test_Project_Path: data-access-layer.Tests/data-access-layer.Tests.csproj
+      Test_Project_Path: data-access-layer.Tests/fkostya.data-access-layer.Tests.csproj
 
     steps:
       - name: running on OS
@@ -50,7 +50,7 @@ jobs:
 
       # nuget package https://samlearnsazure.blog/2021/07/27/publishing-a-nuget-package-to-github-packages/
       - name: pack package
-        run: dotnet pack data-access-layer/data-access-layer.csproj -c Release
+        run: dotnet pack data-access-layer/fkostya.data-access-layer.csproj -c Release
 
       - name: prep packages
         run: dotnet nuget add source --username fkostya --password ${{ secrets.NUGET_PACKAGE }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/fkostya/index.json"

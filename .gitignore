@@ -23,4 +23,6 @@ appui/bin/
 /data-access--layer.Tests/TestResults
 /data-access-layer.Tests/TestResults
 /data-access-layer.Tests/coverage.json
-/data-access-layer.Tests
+/data-access-layer.Tests/coverage
+/data-access-layer.Tests/.config
+*.info
