@@ -47,7 +47,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\data-access-layer\data-access-layer.csproj" />
+    <ProjectReference Include="..\data-access-layer\fkostya.data-access-layer.csproj" />
   </ItemGroup>
 
 </Project>
