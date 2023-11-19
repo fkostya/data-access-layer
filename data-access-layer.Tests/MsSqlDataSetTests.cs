@@ -17,7 +17,7 @@ namespace data_access_layer.Tests
         public void MsSqlDataSet_AddRow_RowCountIsOne()
         {
             MsSqlDataSet ds = new();
-            ds.Add(new Dictionary<string, object> { { "row-0", new object() } });
+            ds.AddRow(new Dictionary<string, object> { { "row-0", new object() } });
 
             Assert.NotEmpty(ds[0]);
         }
@@ -41,6 +41,14 @@ namespace data_access_layer.Tests
         {
             MsSqlDataSet ds = new();
             Assert.NotEmpty(ds.DataSetName);
+        }
+
+        [Fact]
+        public void Rows_AddOneRow_ReturnOneRow()
+        {
+            MsSqlDataSet ds = new();
+            ds.AddRow(new Dictionary<string, object> { { "key-1", new object() } });
+            Assert.NotEmpty(ds.Rows);
         }
     }
 }
