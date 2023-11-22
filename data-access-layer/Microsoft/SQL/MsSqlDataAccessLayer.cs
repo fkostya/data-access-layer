@@ -55,7 +55,7 @@ namespace data_access_layer.Microsoft.SQL
                             {
                                 row[column.Key] = reader[column.Key];
                             }
-                            dataset.Add(row);
+                            dataset.AddRow(row);
                         }
                         list.Add(dataset);
                     } while (await reader.NextResultAsync(cancellationToken));

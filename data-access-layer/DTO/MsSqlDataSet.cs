@@ -17,7 +17,15 @@ namespace data_access_layer
 
         public Dictionary<string, object> this[int index] => this.internalList[index];
 
-        public void Add(Dictionary<string, object> row)
+        public IList<Dictionary<string, object>> Rows 
+        { 
+            get
+            {
+                return internalList;
+            }
+        }
+
+        public void AddRow(Dictionary<string, object> row)
         {
             if(row != null)
             {
