@@ -15,6 +15,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "fkostya.data-access-layer.Tests", "data-access-layer.Tests\fkostya.data-access-layer.Tests.csproj", "{2EC7CEF0-AEA6-4B78-9EBF-35830C9114F5}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{E1AB2810-7055-4801-8F82-DCA6692CB15F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{2B431C3F-9274-4744-8DEE-777A7165ADA3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -32,6 +36,10 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{DA84F122-3523-4712-A47C-D3984DB8AFF9} = {E1AB2810-7055-4801-8F82-DCA6692CB15F}
+		{2EC7CEF0-AEA6-4B78-9EBF-35830C9114F5} = {2B431C3F-9274-4744-8DEE-777A7165ADA3}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A4E8B3AA-391E-4271-BAB9-585A1D53A735}
