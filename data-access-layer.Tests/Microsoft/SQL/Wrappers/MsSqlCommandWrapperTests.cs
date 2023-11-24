@@ -1,4 +1,6 @@
-﻿using data_access_layer.Microsoft.SQL.Wrappers;
+﻿using AutoFixture;
+using data_access_layer.Microsoft.SQL.Wrappers;
+using FluentAssertions;
 using Microsoft.Data.SqlClient;
 using Moq;
 using System.Data.Common;
@@ -9,12 +11,15 @@ namespace data_access_layer.Tests.Microsoft.SQL.Wrappers
     {
         class DbCommandFake
         {
-            public Mock<DbCommand> Mock { get; init; } = new Mock<DbCommand>();
-            private Mock<DbDataReader> readerMock = new Mock<DbDataReader>();
+            public readonly Mock<DbCommand> Mock;
+            private readonly Mock<DbDataReader> readerMock;
+            private readonly IFixture _fixture;
 
             public DbCommandFake()
             {
-                Mock.Setup(_ => _.CommandText).Returns("test command");
+                _fixture = new Fixture();
+                Mock = _fixture.Create<Mock<DbCommand>>();
+                readerMock = _fixture.Create<Mock<DbDataReader>>();
             }
 
             public Task<DbDataReader> ExecuteReaderAsync()
@@ -23,49 +28,53 @@ namespace data_access_layer.Tests.Microsoft.SQL.Wrappers
             }
         }
 
+        private readonly MsSqlCommandWrapper _sut;
+        private readonly IFixture _fixture;
+        private readonly DbCommandFake _commandFake;
+
+        public MsSqlCommandWrapperTests()
+        {
+            _fixture = new Fixture();
+            _commandFake = _fixture.Freeze<DbCommandFake>();
+            _sut = new(_commandFake.Mock.Object);
+            _fixture.Register(() => new SqlCommand());
+        }
+
         [Fact]
         public void NewInstance_EmptyArgument_NotNull()
         {
-            MsSqlCommandWrapper wrapper = new();
-            Assert.NotNull(wrapper);
+            _sut.Should().NotBeNull();
         }
 
         [Fact]
         public void NewInstance_SqlCommandAsArgument_NotNull()
         {
-            MsSqlCommandWrapper wrapper = new(new SqlCommand());
-            Assert.NotNull(wrapper);
+            MsSqlCommandWrapper wrapper = new(_fixture.Create<SqlCommand>());
+            wrapper.Should().NotBeNull();
         }
 
         [Fact]
         public async Task ExecuteReaderAsync_SqlCommandAsArgument_NotNull()
         {
-            var mock = new DbCommandFake();
-
-            MsSqlCommandWrapper wrapper = new(mock.Mock.Object);
-            var result = await wrapper.ExecuteReaderAsync(CancellationToken.None);
+            var result = await _sut.ExecuteReaderAsync(CancellationToken.None);
             
-            Assert.NotNull(result);
+            result.Should().NotBeNull();
         }
 
         [Fact]
         public async Task DisposeAsync_MethodCalledOnce()
         {
-            var mock = new DbCommandFake();
-            var wrapper = new Mock<MsSqlCommandWrapper>(mock.Mock.Object);
-            
-            await wrapper.Object.DisposeAsync();
+            await _sut.DisposeAsync();
+            _commandFake.Mock.Verify(_ => _.DisposeAsync(), Times.Once);
         }
 
         [Fact]
         public void CommandText_SetCommand_GetEqualToSet()
         {
-            var mock = new DbCommandFake();
-            var wrapper = new MsSqlCommandWrapper(mock.Mock.Object);
-            wrapper.CommandText = "test command";
+            _commandFake.Mock.Setup(_ => _.CommandText).Returns("test command");
+            _sut.CommandText = "test command";
 
-
-            Assert.Equal("test command", wrapper.CommandText);
+            _sut.CommandText.Should().BeSameAs("test command");
         }
     }
 }
