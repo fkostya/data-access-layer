@@ -28,6 +28,8 @@ namespace data_access_layer.Tests.Microsoft.SQL
             _sut = _fixture.Create<MsSqlDataReaderWrapper>();
             _fixture
                 .Register(() => new DataTable("unit-test-table-0"));
+            _fixture
+                .Register(() => new MsSqlDataReaderWrapper(reader.Object));
         }
 
         [Fact]
@@ -45,8 +47,7 @@ namespace data_access_layer.Tests.Microsoft.SQL
                 .Setup(_ => _.GetColumnSchemaAsync(It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new ReadOnlyCollection<DbColumn>(new List<DbColumn>() { new DbColumnStub("column-0") }));
 
-            MsSqlDataReaderWrapper sut = new(reader.Object);
-            var columns = await sut.GetColumnSchemaAsync();
+            var columns = await _fixture.Create<MsSqlDataReaderWrapper>().GetColumnSchemaAsync();
 
             columns.Should().NotBeEmpty();
             (columns?.FirstOrDefault() as DbColumnStub)?.ColumnName.Should().BeSameAs("column-0");
@@ -60,8 +61,7 @@ namespace data_access_layer.Tests.Microsoft.SQL
                 .Setup(_ => _.GetColumnSchemaAsync(It.IsAny<CancellationToken>()))
                 .Throws(new Exception());
 
-            MsSqlDataReaderWrapper sut = new(reader.Object);
-            var columns = await sut.GetColumnSchemaAsync();
+            var columns = await _fixture.Create<MsSqlDataReaderWrapper>().GetColumnSchemaAsync();
 
             columns.Should().BeEmpty();
             reader.Verify(_ => _.GetColumnSchemaAsync(It.IsAny<CancellationToken>()), Times.Once);
@@ -74,8 +74,7 @@ namespace data_access_layer.Tests.Microsoft.SQL
                 .Setup(_ => _.NextResultAsync(It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true);
 
-            MsSqlDataReaderWrapper sut = new(reader.Object);
-            var next = await sut.NextResultAsync();
+            var next = await _fixture.Create<MsSqlDataReaderWrapper>().NextResultAsync();
 
             next.Should().BeTrue();
             reader.Verify(_ => _.NextResultAsync(It.IsAny<CancellationToken>()), Times.Once);
@@ -89,9 +88,8 @@ namespace data_access_layer.Tests.Microsoft.SQL
                 .ReturnsAsync(true)
                 .ReturnsAsync(false);
 
-            MsSqlDataReaderWrapper sut = new(reader.Object);
-            var next = await sut.NextResultAsync();
-            var last = await sut.NextResultAsync();
+            var next = await _fixture.Create<MsSqlDataReaderWrapper>().NextResultAsync();
+            var last = await _fixture.Create<MsSqlDataReaderWrapper>().NextResultAsync();
 
             last.Should().BeFalse();
             reader.Verify(_ => _.NextResultAsync(It.IsAny<CancellationToken>()), Times.Exactly(2));
@@ -122,8 +120,7 @@ namespace data_access_layer.Tests.Microsoft.SQL
                 .Setup(_ => _.GetSchemaTable())
                 .Returns(table);
 
-            MsSqlDataReaderWrapper sut = new(reader.Object);
-            var db = sut.GetSchemaTable();
+            var db = _fixture.Create<MsSqlDataReaderWrapper>().GetSchemaTable();
 
             db.Should().NotBeNull();
             db?.TableName.Should().BeSameAs("unit-test-table-0");
@@ -137,8 +134,7 @@ namespace data_access_layer.Tests.Microsoft.SQL
                 .Setup(_ => _.ReadAsync(It.IsAny<CancellationToken>()))
                 .ReturnsAsync(false);
 
-            MsSqlDataReaderWrapper sut = new(reader.Object);
-            var read = await sut.ReadAsync();
+            var read = await _fixture.Create<MsSqlDataReaderWrapper>().ReadAsync();
 
             read.Should().BeFalse();
             reader.Verify(_ => _.ReadAsync(It.IsAny<CancellationToken>()), Times.Once);
@@ -151,8 +147,7 @@ namespace data_access_layer.Tests.Microsoft.SQL
                 .Setup(_ => _.ReadAsync(It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true);
 
-            MsSqlDataReaderWrapper sut = new(reader.Object);
-            var read = await sut.ReadAsync();
+            var read = await _fixture.Create<MsSqlDataReaderWrapper>().ReadAsync();
 
             read.Should().BeTrue();
             reader.Verify(_ => _.ReadAsync(It.IsAny<CancellationToken>()), Times.Once);
@@ -331,8 +326,7 @@ namespace data_access_layer.Tests.Microsoft.SQL
                 .Setup(_ => _.GetOrdinal(It.IsAny<string>()))
                 .Returns(0);
 
-            MsSqlDataReaderWrapper sut = new(reader.Object);
-            var value = sut.GetValueOrDefault(It.IsAny<string>());
+            var value = _fixture.Create<MsSqlDataReaderWrapper>().GetValueOrDefault(It.IsAny<string>());
 
             value.Should().NotBeNull();
             reader.Verify(_ => _.GetValue(It.IsAny<int>()), Times.Once);
@@ -351,9 +345,7 @@ namespace data_access_layer.Tests.Microsoft.SQL
             reader
                 .Setup(x => x.Close());
 
-            MsSqlDataReaderWrapper sut = new(reader.Object);
-
-            sut.Close();
+            _fixture.Create<MsSqlDataReaderWrapper>().Close();
             reader.Verify(_ => _.Close(), Times.Once);
         }
 
@@ -363,9 +355,7 @@ namespace data_access_layer.Tests.Microsoft.SQL
             reader
                 .Setup(x => x.DisposeAsync());
 
-            MsSqlDataReaderWrapper sut = new(reader.Object);
-
-            await sut.DisposeAsync();
+            await _fixture.Create<MsSqlDataReaderWrapper>().DisposeAsync();
             reader.Verify(_ => _.DisposeAsync(), Times.Once);
         }
 
@@ -384,9 +374,7 @@ namespace data_access_layer.Tests.Microsoft.SQL
                 .Setup(x => x.HasRows)
                 .Returns(true);
 
-            MsSqlDataReaderWrapper sut = new(reader.Object);
-
-            var hasRows = sut.HasRows;
+            var hasRows = _fixture.Create<MsSqlDataReaderWrapper>().HasRows;
 
             hasRows.Should().BeTrue();
             reader.Verify(_ => _.HasRows, Times.Once);
@@ -407,9 +395,7 @@ namespace data_access_layer.Tests.Microsoft.SQL
                 .Setup(x => x[It.IsAny<string>()])
                 .Returns(new object());
 
-            MsSqlDataReaderWrapper sut = new(reader.Object);
-
-            var value = sut[It.IsAny<string>()];
+            var value = _fixture.Create<MsSqlDataReaderWrapper>()[It.IsAny<string>()];
 
             value.Should().NotBeNull();
             reader.Verify(_ => _[It.IsAny<string>()], Times.Once);
