@@ -1,21 +1,30 @@
-﻿using data_access_layer.Model;
+﻿using AutoFixture;
+using data_access_layer.Model;
+using FluentAssertions;
 
 namespace data_access_layer.Tests.Models
 {
     public class MsSqlConnectionStringTest
     {
+        private readonly IFixture _fixture;
+        private readonly MsSqlConnectionString _sut;
+
+        public MsSqlConnectionStringTest()
+        {
+            _fixture = new Fixture();
+            _sut = new(_fixture.Create<string>(), _fixture.Create<string>(), _fixture.Create<string>(), _fixture.Create<string>());
+        }
+
         [Fact]
         public void NewInstance_NotNull()
         {
-            var connectionString = new MsSqlConnectionString("u-test", "u-server", "u-database", "u-userid", "u-password", "u-sessionid");
-
-            Assert.NotNull(connectionString);
+            _sut.Should().NotBeNull();
         }
 
         [Fact]
         public void NewInstanceWithoutConnectionTimeout_IntegratedSecurityAsFalse_CompareConnectionString()
         {
-            var connectionString = new MsSqlConnectionString("u-test", "u-server", "u-database", "u-userid", "u-password", "u-sessionid");
+            var sut = new MsSqlConnectionString("u-test", "u-server", "u-database", "u-userid", "u-password", "u-sessionid");
 
             //generate valid connection string
             //SqlConnectionStringBuilder builder = new()
@@ -28,47 +37,47 @@ namespace data_access_layer.Tests.Models
             //    ConnectTimeout = 100,
             //};
 
-            Assert.Equal("Data Source=u-server;Initial Catalog=u-database;Integrated Security=False;User ID=u-userid;Password=u-password;Connect Timeout=180", connectionString.ConnectionString);
+            Assert.Equal("Data Source=u-server;Initial Catalog=u-database;Integrated Security=False;User ID=u-userid;Password=u-password;Connect Timeout=180", sut.ConnectionString);
         }
 
         [Fact]
         public void NewInstanceWithConnectionTimeout_IntegratedSecurityAsFalse_CompareConnectionString()
         {
-            var connectionString = new MsSqlConnectionString("u-test", "u-server", "u-database", "u-userid", "u-password", "u-sessionid", 200);
+            var sut = new MsSqlConnectionString("u-test", "u-server", "u-database", "u-userid", "u-password", "u-sessionid", 200);
 
-            Assert.Equal("Data Source=u-server;Initial Catalog=u-database;Integrated Security=False;User ID=u-userid;Password=u-password;Connect Timeout=200", connectionString.ConnectionString);
+            Assert.Equal("Data Source=u-server;Initial Catalog=u-database;Integrated Security=False;User ID=u-userid;Password=u-password;Connect Timeout=200", sut.ConnectionString);
         }
 
         [Fact]
         public void NewInstanceWithoutConnectionTimeout_IntegratedSecurityAsTrue_CompareConnectionString()
         {
-            var connectionString = new MsSqlConnectionString("u-test", "u-server", "u-database", "u-sessionid");
+            var sut = new MsSqlConnectionString("u-test", "u-server", "u-database", "u-sessionid");
 
-            Assert.Equal("Data Source=u-server;Initial Catalog=u-database;Integrated Security=True;Connect Timeout=180", connectionString.ConnectionString);
+            Assert.Equal("Data Source=u-server;Initial Catalog=u-database;Integrated Security=True;Connect Timeout=180", sut.ConnectionString);
         }
 
         [Fact]
         public void NewInstanceWithConnectionTimeout_IntegratedSecurityAsTrue_CompareConnectionString()
         {
-            var connectionString = new MsSqlConnectionString("u-test", "u-server", "u-database", "u-sessionid", 200);
+            var sut = new MsSqlConnectionString("u-test", "u-server", "u-database", "u-sessionid", 200);
 
-            Assert.Equal("Data Source=u-server;Initial Catalog=u-database;Integrated Security=True;Connect Timeout=200", connectionString.ConnectionString);
+            Assert.Equal("Data Source=u-server;Initial Catalog=u-database;Integrated Security=True;Connect Timeout=200", sut.ConnectionString);
         }
 
         [Fact]
         public void NewInstance_NotValidServer_EmptyString()
         {
-            var connectionString = new MsSqlConnectionString("u-test", "", "u-database", "u-sessionid");
+            var sut = new MsSqlConnectionString("u-test", "", "u-database", "u-sessionid");
 
-            Assert.Equal("", connectionString.ConnectionString);
+            sut.ConnectionString.Should().BeEmpty();
         }
 
         [Fact]
         public void NewInstance_NotValidDatbase_EmptyString()
         {
-            var connectionString = new MsSqlConnectionString("u-test", "u-server", "", "u-sessionid");
+            var sut = new MsSqlConnectionString("u-test", "u-server", "", "u-sessionid");
 
-            Assert.Equal("", connectionString.ConnectionString);
+            sut.ConnectionString.Should().BeEmpty();
         }
     }
 }
