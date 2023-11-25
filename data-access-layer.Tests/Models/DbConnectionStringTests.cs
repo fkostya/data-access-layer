@@ -1,4 +1,6 @@
-﻿using data_access_layer.Model;
+﻿using AutoFixture;
+using data_access_layer.Model;
+using FluentAssertions;
 
 namespace data_access_layer.Tests.Models
 {
@@ -27,10 +29,10 @@ namespace data_access_layer.Tests.Models
         [InlineData("s", "d", "u", "p", true)]
         public void IsValid_CheckValidConnectionArgs(string server, string db, string user, string pwd, bool result)
         {
-            DbConnectionStringFake connection = new(server, db, user, pwd);
-            var valid = connection.isValid();
+            DbConnectionStringFake sut = new(server, db, user, pwd);
+            var valid = sut.isValid();
 
-            Assert.Equal(result, valid);
+            valid.Should().Be(result);
         }
 
         [Theory]
@@ -42,9 +44,9 @@ namespace data_access_layer.Tests.Models
         [InlineData("server", 1, "Data Source=server;1")]
         public void DbServerInstanceAndPort_CompareConnectionStrings(string server, int? port, string expected)
         {
-            DbConnectionStringFake connection = new(server, "", "", "",  port);
+            DbConnectionStringFake sut = new(server, "", "", "",  port);
 
-            Assert.Equal(expected, connection.GetconnectionStringWithPort());
+            sut.GetconnectionStringWithPort().Should().Be(expected);
         }
 
         [Theory]
@@ -57,9 +59,9 @@ namespace data_access_layer.Tests.Models
         [InlineData("pwd", "uid", "Integrated Security=False;User ID=uid;Password=pwd")]
         public void Credentials_CompareCredentials(string pwd, string uid, string expected)
         {
-            DbConnectionStringFake connection = new("", "", uid, pwd);
+            DbConnectionStringFake sut = new("", "", uid, pwd);
 
-            Assert.Equal(expected, connection.GetCredentials());
+            sut.GetCredentials().Should().Be(expected);
         }
     }
 }
