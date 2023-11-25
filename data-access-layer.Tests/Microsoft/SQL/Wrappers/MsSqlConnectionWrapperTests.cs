@@ -1,5 +1,7 @@
-﻿using data_access_layer.Microsoft.SQL.Wrappers;
+﻿using AutoFixture;
+using data_access_layer.Microsoft.SQL.Wrappers;
 using data_access_layer.Model;
+using FluentAssertions;
 using Microsoft.Data.SqlClient;
 using Moq;
 using System.Data;
@@ -9,13 +11,32 @@ namespace data_access_layer.Tests.Microsoft.SQL.Wrappers
 {
     public class MsSqlConnectionWrapperTests
     {
+        private readonly IFixture _fixture;
+        private readonly MsSqlConnectionWrapper _sut;
+        private readonly Mock<DbConnection> _connectionMock;
+        
+        public MsSqlConnectionWrapperTests()
+        {
+            _fixture = new Fixture();
+            _connectionMock = _fixture.Freeze<Mock<DbConnection>>();
+            _fixture.Register(() =>
+                new MsSqlConnectionString(
+                    _fixture.Create<string>(),
+                    _fixture.Create<string>(),
+                    _fixture.Create<string>(),
+                    _fixture.Create<string>()));
+
+            _fixture.Register(() => new SqlConnection(_fixture.Create<MsSqlConnectionString>().ConnectionString));
+            _fixture.Register(() => new Func<MsSqlConnectionString, DbConnection>((c) => _fixture.Create<SqlConnection>()));
+            _fixture.Register(() => new Func<MsSqlConnectionString, DbConnection>((c) => _connectionMock.Object));
+
+            _sut = new MsSqlConnectionWrapper(_fixture.Create<MsSqlConnectionString>());
+        }
+
         [Fact]
         public void NewInstance_ValidConnection_InstanceNotNull()
         {
-            MsSqlConnectionString connection = new("name", "server", "database", "sid");
-            MsSqlConnectionWrapper wrapper = new(connection);
-
-            Assert.NotNull(wrapper);
+            _sut.Should().NotBeNull();
         }
 
         [Fact]
@@ -23,76 +44,72 @@ namespace data_access_layer.Tests.Microsoft.SQL.Wrappers
         {
             MsSqlConnectionWrapper wrapper = new(null);
 
-            Assert.NotNull(wrapper);
+            wrapper.Should().NotBeNull();
         }
 
         [Fact]
         public void NewInstance_ConnectionAndFuncFactory_InstanceNotNull()
         {
-            var connection = new MsSqlConnectionString("name", "server", "database", "sid");
-            Func<MsSqlConnectionString, DbConnection> factory = (connection) => new SqlConnection(connection.ConnectionString);
-            MsSqlConnectionWrapper wrapper = new(connection, factory);
+            MsSqlConnectionWrapper sut = new(_fixture.Create<MsSqlConnectionString>(), _fixture.Create<Func<MsSqlConnectionString, DbConnection>>());
 
-            Assert.NotNull(wrapper);
-            Assert.NotNull(wrapper.Connection);
+            sut.Should().NotBeNull();
+            sut.Connection.Should().NotBeNull();
         }
 
         [Fact]
         public async Task OpenAsync_SqlInstanceIsNull_VerifyCallOneTime()
         {
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            var wrapper = new MsSqlConnectionWrapper(null);
+            var sut = new MsSqlConnectionWrapper(null);
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
 
-            await wrapper.OpenAsync(default);
+            await sut.OpenAsync(default);
         }
 
         [Fact]
         public async Task OpenAsync_SqlInstanceIsNotNull_VerifyCallOneTime()
         {
-            var connection = new Mock<DbConnection>();
-            connection
+            _connectionMock
                 .Setup(_ => _.OpenAsync(It.IsAny<CancellationToken>()))
                 .Verifiable(Times.Once);
 
-            var func = new Func<MsSqlConnectionString, DbConnection>((c) => connection.Object);
-            var wrapper = new MsSqlConnectionWrapper(new MsSqlConnectionString("n", "s", "d", "s"), func);
+            var sut = new MsSqlConnectionWrapper(_fixture.Create<MsSqlConnectionString>(), _fixture.Create<Func<MsSqlConnectionString, DbConnection>>());
 
-            await wrapper.OpenAsync(default);
+            await sut.OpenAsync(default);
+            _connectionMock.Verify(_ => _.OpenAsync(It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact]
         public async Task OpenAsync_SqlInstanceThrowException_VerifyCallOneTime()
         {
-            var connection = new Mock<DbConnection>();
-            connection
+            _connectionMock
                 .Setup(_ => _.OpenAsync(It.IsAny<CancellationToken>()))
                 .Throws(new Exception());
 
-            var func = new Func<MsSqlConnectionString, DbConnection>((c) => connection.Object);
-            var wrapper = new MsSqlConnectionWrapper(new MsSqlConnectionString("n", "s", "d", "s"), func);
+            var sut = new MsSqlConnectionWrapper(_fixture.Create<MsSqlConnectionString>(), _fixture.Create<Func<MsSqlConnectionString, DbConnection>>());
+            await sut.OpenAsync(default);
 
-            await wrapper.OpenAsync(default);
+            _connectionMock.Verify(_ => _.OpenAsync(It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact]
         public void CreateCommand_SqlInstanceIsNull_ReturnsCommandWrapper() 
         {
-            MsSqlConnectionWrapper wrapper = new(null);
+            MsSqlConnectionWrapper sut = new(null);
 
-            var command = wrapper.CreateCommand();
+            var command = sut.CreateCommand();
 
-            Assert.NotNull(command);
+            command.Should().NotBeNull();
         }
 
         [Fact]
         public void CreateCommand_SqlInstanceIsNotNull_ReturnsCommandWrapper()
         {
-            MsSqlConnectionWrapper wrapper = new(new MsSqlConnectionString("n", "s", "d", "s"));
+            MsSqlConnectionWrapper sut = new(_fixture.Create<MsSqlConnectionString>());
 
-            var command = wrapper.CreateCommand();
+            var command = sut.CreateCommand();
 
-            Assert.NotNull(command);
+            command.Should().NotBeNull();
         }
 
         class DbConnectionFakeException : DbConnection
@@ -141,55 +158,49 @@ namespace data_access_layer.Tests.Microsoft.SQL.Wrappers
             var connection = new DbConnectionFakeException();
 
             var func = new Func<MsSqlConnectionString, DbConnection>((c) => connection);
-            MsSqlConnectionWrapper wrapper = new(new MsSqlConnectionString("n", "s", "d", "s"), func);
+            MsSqlConnectionWrapper sut = new(_fixture.Create<MsSqlConnectionString>(), func);
 
-            var command = wrapper.CreateCommand();
+            var command = sut.CreateCommand();
 
-            Assert.NotNull(command);
+            command.Should().NotBeNull();
         }
 
         [Fact]
         public async Task CloseAsync_SqlInstanceIsNull_VerifyCallOneTime() {
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            var wrapper = new MsSqlConnectionWrapper(null);
+            var sut = new MsSqlConnectionWrapper(null);
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
 
-            //wrapper.Setup(_ => _.CloseAsync()).Verifiable(Times.Once);
-
-            await wrapper.CloseAsync();
+            await sut.CloseAsync();
         }
 
         [Fact]
         public async Task CloseAsync_SqlInstanceIsNotNull_VerifyCallOneTime()
         {
-            var connection = new Mock<DbConnection>();
-            var func = new Func<MsSqlConnectionString, DbConnection>((c) => connection.Object);
-            var wrapper = new MsSqlConnectionWrapper(new MsSqlConnectionString("n", "s", "d", "s"), func);
+            _connectionMock.Setup(_ => _.CloseAsync());
+            var sut = new MsSqlConnectionWrapper(_fixture.Create<MsSqlConnectionString>(), _fixture.Create<Func<MsSqlConnectionString, DbConnection>>());
 
-            connection.Setup(_ => _.CloseAsync()).Verifiable(Times.Once);
-
-            await wrapper.CloseAsync();
+            await sut.CloseAsync();
+            _connectionMock.Verify(_ => _.CloseAsync(), Times.Once);
         }
 
         [Fact]
         public async Task DisposeAsyncSqlInstanceIsNull_VerifyCallOneTime() {
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            var wrapper = new MsSqlConnectionWrapper(null);
+            var sut = new MsSqlConnectionWrapper(null);
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
 
-            await wrapper.DisposeAsync();
+            await sut.DisposeAsync();
         }
 
         [Fact]
         public async Task DisposeAsyncSqlInstanceIsNotNull_VerifyCallOneTime()
         {
-            var connection = new Mock<DbConnection>();
-            var func = new Func<MsSqlConnectionString, DbConnection>((c) => connection.Object);
-            var wrapper = new MsSqlConnectionWrapper(new MsSqlConnectionString("n", "s", "d", "s"), func);
+            _connectionMock.Setup(_ => _.DisposeAsync());
+            var sut = new MsSqlConnectionWrapper(_fixture.Create<MsSqlConnectionString>(), _fixture.Create<Func<MsSqlConnectionString, DbConnection>>());
 
-            connection.Setup(_ => _.DisposeAsync()).Verifiable(Times.Once);
-
-            await wrapper.DisposeAsync();
+            await sut.DisposeAsync();
+            _connectionMock.Verify(_ => _.DisposeAsync(), Times.Once);
         }
     }
 }
